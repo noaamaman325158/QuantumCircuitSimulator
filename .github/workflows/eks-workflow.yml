@@ -25,12 +25,6 @@ jobs:
         python -m pip install --upgrade pip
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
     
-    - name: Run tests
-      run: |
-        # Add your Python tests here
-        # For example: pytest
-        echo "Running tests..."
-        
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v2
       with:
@@ -38,9 +32,18 @@ jobs:
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: ${{ secrets.AWS_DEFAULT_REGION }}
     
-    - name: Login to Amazon ECR
-      id: login-ecr
-      uses: aws-actions/amazon-ecr-login@v1
+    - name: Debug AWS identity
+      run: |
+        aws sts get-caller-identity
+        aws ecr describe-repositories || echo "No repositories or permission issue"
+    
+    - name: Create repository if it doesn't exist
+      run: |
+        aws ecr describe-repositories --repository-names ${{ secrets.APP_NAME }} || aws ecr create-repository --repository-name ${{ secrets.APP_NAME }}
+    
+    - name: Manual ECR login
+      run: |
+        aws ecr get-login-password --region ${{ secrets.AWS_DEFAULT_REGION }} | docker login --username AWS --password-stdin ${{ secrets.DOCKER_REGISTRY }}
     
     - name: Set up QEMU
       uses: docker/setup-qemu-action@v2
@@ -48,15 +51,12 @@ jobs:
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v2
       
-    - name: Build and push Docker image
-      id: docker_build
-      uses: docker/build-push-action@v3
-      with:
-        context: .
-        push: true
-        tags: |
-          ${{ secrets.DOCKER_REGISTRY }}/${{ secrets.APP_NAME }}:${{ steps.get_version.outputs.VERSION }}
-          ${{ secrets.DOCKER_REGISTRY }}/${{ secrets.APP_NAME }}:latest
+    - name: Build and push manually
+      run: |
+        docker build -t ${{ secrets.DOCKER_REGISTRY }}/${{ secrets.APP_NAME }}:${{ steps.get_version.outputs.VERSION }} .
+        docker tag ${{ secrets.DOCKER_REGISTRY }}/${{ secrets.APP_NAME }}:${{ steps.get_version.outputs.VERSION }} ${{ secrets.DOCKER_REGISTRY }}/${{ secrets.APP_NAME }}:latest
+        docker push ${{ secrets.DOCKER_REGISTRY }}/${{ secrets.APP_NAME }}:${{ steps.get_version.outputs.VERSION }}
+        docker push ${{ secrets.DOCKER_REGISTRY }}/${{ secrets.APP_NAME }}:latest
     
     - name: Deploy to AWS EC2
       uses: appleboy/ssh-action@master
