@@ -62,7 +62,12 @@ Here's an overview of the deployment process:
 
 5. On the EC2 instance, it stops any existing containers, prunes the Docker system, and pulls the latest Docker image from Docker Hub.
 
-6. Finally, it starts the containers using Docker Compose, which includes the web application and Redis database.
+6. In addition, it starts the containers using Docker Compose, which includes the web application and Redis database.
+   
+7. Finally, Created some abstraction layer with CloudFront AWS service.
+
+You can access the public version in this CloudFront Distribution with HTTPS protocol:
+(https://d1vopm5o4bpn6u.cloudfront.net/docs)
 
 The deployment workflow ensures that the latest version of the application is deployed on the EC2 instance whenever changes are pushed to the "master" branch.
 
