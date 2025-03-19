@@ -57,4 +57,4 @@ jobs:
                 sudo docker rm $container_id
             fi
             sudo docker system prune -f -a
-            sudo docker run -d --name quantum-circuit-simulator -p 8000:8000 ${{ secrets.DOCKERHUB_USERNAME }}/backend-python-service:${{ steps.get_version.outputs.VERSION }}
+            sudo docker run -d --name quantum-circuit-simulator -p 8000:8000 ${{ secrets.DOCKERHUB_USERNAME }}/quantum-circuit-simulator:${{ steps.get_version.outputs.VERSION }}
