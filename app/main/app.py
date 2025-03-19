@@ -1,5 +1,7 @@
 import json
 import uuid
+import time
+
 from dotenv import load_dotenv
 
 from fastapi import FastAPI, BackgroundTasks, HTTPException
@@ -10,6 +12,13 @@ from app.main.models.PendingTaskResponse import PendingTaskResponse
 from app.main.service.quantum_circuit_service import QuantumCircuitService
 from app.main.models.CompletedTaskResponse import CompletedTaskResponse
 from app.main.models.ErrorTaskResponse import ErrorTaskResponse
+
+# from models.QuantumCircuitRequest import QuantumCircuitRequest
+# from models.TaskResponse import TaskResponse
+# from models.PendingTaskResponse import PendingTaskResponse
+# from service.quantum_circuit_service import QuantumCircuitService
+# from models.CompletedTaskResponse import CompletedTaskResponse
+# from models.ErrorTaskResponse import ErrorTaskResponse
 
 import logging
 import redis
@@ -50,6 +59,9 @@ app = FastAPI(
 
 
 
+
+import time
+
 async def process_quantum_circuit(task_id: str, qasm_string: str):
     """
     Process a quantum circuit asynchronously.
@@ -59,6 +71,9 @@ async def process_quantum_circuit(task_id: str, qasm_string: str):
         qasm_string: QASM representation of a quantum circuit
     """
     try:
+        # Simulate pending status by sleeping for a few seconds
+        time.sleep(30)  # Sleep for 10 seconds
+
         # Create an instance of the service
         service = QuantumCircuitService(shots=1024)
 
@@ -187,7 +202,7 @@ async def get_task(task_id: str):
 
 
 @app.get("/test-redis")
-async def test_redis_connection():
+async def check_redis_connection():
     """
     Test the connection to the Redis server.
     """
@@ -211,5 +226,4 @@ async def test_redis_connection():
 
 if __name__ == "__main__":
     import uvicorn
-
     uvicorn.run(app, host="0.0.0.0", port=8000)
