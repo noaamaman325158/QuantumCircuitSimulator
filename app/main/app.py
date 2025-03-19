@@ -2,12 +2,12 @@ import json
 import uuid
 from fastapi import FastAPI, BackgroundTasks, HTTPException
 
-from models.QuantumCircuitRequest import QuantumCircuitRequest
-from models.TaskResponse import TaskResponse
-from models.PendingTaskResponse import PendingTaskResponse
-from service.quantum_circuit_service import QuantumCircuitService
-from models.CompletedTaskResponse import CompletedTaskResponse
-from models.ErrorTaskResponse import ErrorTaskResponse
+from app.main.models.QuantumCircuitRequest import QuantumCircuitRequest
+from app.main.models.TaskResponse import TaskResponse
+from app.main.models.PendingTaskResponse import PendingTaskResponse
+from app.main.service.quantum_circuit_service import QuantumCircuitService
+from app.main.models.CompletedTaskResponse import CompletedTaskResponse
+from app.main.models.ErrorTaskResponse import ErrorTaskResponse
 
 import logging
 import redis
