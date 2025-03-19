@@ -119,6 +119,19 @@ class QuantumCircuitService:
 
         return formatted_counts
 
+    def get_result_from_qasm(self, qasm_string):
+        """
+        Wrapper method to get the result object from a QASM string.
+
+        Args:
+            qasm_string: String containing QASM representation of a quantum circuit
+
+        Returns:
+            Result object containing the measurement results or error
+        """
+        return self.execute_qasm(qasm_string)
+
+
 if __name__ == "__main__":
     service = QuantumCircuitService()
 
@@ -142,29 +155,5 @@ h q[0];
 cx q[0], q[1];
 measure q -> c;
 """
-
-    print("\n--- Testing QASM 3.0 parsing ---")
-    try:
-        result = service.execute_qasm(bell_qasm_3)
-        if not result.get("error", True):
-            formatted = service.format_counts(result.get("counts", {}))
-            print(result.get("counts", {}))
-            print("\nFormatted for API:")
-            print(formatted)
-        else:
-            print(result)
-    except Exception as e:
-        print(f"Service test failed: {str(e)}")
-
-    print("\n--- Testing QASM 2.0 parsing ---")
-    try:
-        result = service.execute_qasm(bell_qasm_2)
-        if not result.get("error", True):
-            formatted = service.format_counts(result.get("counts", {}))
-            print(result.get("counts", {}))
-            print("\nFormatted for API:")
-            print(formatted)
-        else:
-            print(result)
-    except Exception as e:
-        print(f"Service test failed: {str(e)}")
+    result1 = service.get_result_from_qasm(bell_qasm_3)
+    result2 = service.get_result_from_qasm(bell_qasm_2)
