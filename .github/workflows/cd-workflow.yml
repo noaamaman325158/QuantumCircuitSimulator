@@ -50,7 +50,7 @@ jobs:
           username: ec2-user
           key: ${{ secrets.SSH_KEY }}
           script: |
-            container_id=$(sudo docker ps | grep "0.0.0.0:8085" | awk '{print $1}')
+            container_id=$(sudo docker ps | grep "0.0.0.0:8000" | awk '{print $1}')
 
             if [ ! -z "$container_id" ]; then
                 sudo docker kill $container_id
