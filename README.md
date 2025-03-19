@@ -66,8 +66,8 @@ Here's an overview of the deployment process:
    
 7. Finally, Created some abstraction layer with CloudFront AWS service.
 
-You can access the public version in this CloudFront Distribution with HTTPS protocol:
-(https://d1vopm5o4bpn6u.cloudfront.net/docs)
+You can access the public version in this CloudFront Distribution and Route53 with HTTPS protocol:
+(http://api.noaamaman.com/docs)
 
 The deployment workflow ensures that the latest version of the application is deployed on the EC2 instance whenever changes are pushed to the "master" branch.
 
