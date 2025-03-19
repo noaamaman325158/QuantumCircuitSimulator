@@ -1,0 +1,435 @@
+{
+  "info": {
+    "name": "Quantum Circuit Automation Test",
+    "_postman_id": "a99687a2-5a30-4dc5-a1ba-d3fb5f623805",
+    "description": "Tests for quantum circuit simulation API with various circuit configurations",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Bell State",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "var jsonData = JSON.parse(responseBody);",
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "pm.test(\"Task ID is present\", function () {",
+              "    pm.expect(jsonData.task_id).to.exist;",
+              "});",
+              "pm.environment.set(\"taskId\", jsonData.task_id);",
+              "console.log(\"Task ID: \" + jsonData.task_id);"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"qc\": \"OPENQASM 3.0;\\nqreg q[2];\\ncreg c[2];\\nh q[0];\\ncx q[0], q[1];\\nmeasure q -> c;\"\n}"
+        },
+        "url": {
+          "raw": "http://0.0.0.0:8000/tasks",
+          "protocol": "http",
+          "host": [
+            "0",
+            "0",
+            "0",
+            "0"
+          ],
+          "port": "8000",
+          "path": [
+            "tasks"
+          ]
+        },
+        "description": "Submit a Bell state circuit for execution"
+      },
+      "response": []
+    },
+    {
+      "name": "Check Bell State Result",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "var jsonData = JSON.parse(responseBody);",
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "pm.test(\"Task status is available\", function () {",
+              "    pm.expect(jsonData.status).to.exist;",
+              "});",
+              "pm.test(\"Status check\", function () {",
+              "    pm.expect([\"completed\", \"processing\", \"pending\"]).to.include(jsonData.status);",
+              "});",
+              "if (jsonData.status === \"completed\") {",
+              "    pm.test(\"Results present for completed task\", function () {",
+              "        pm.expect(jsonData.result).to.exist;",
+              "    });",
+              "}"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://0.0.0.0:8000/tasks/{{taskId}}",
+          "protocol": "http",
+          "host": [
+            "0",
+            "0",
+            "0",
+            "0"
+          ],
+          "port": "8000",
+          "path": [
+            "tasks",
+            "{{taskId}}"
+          ]
+        },
+        "description": "Check the status of the Bell state task"
+      },
+      "response": []
+    },
+    {
+      "name": "GHZ State",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "var jsonData = JSON.parse(responseBody);",
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "pm.test(\"Task ID is present\", function () {",
+              "    pm.expect(jsonData.task_id).to.exist;",
+              "});",
+              "pm.environment.set(\"ghzTaskId\", jsonData.task_id);",
+              "console.log(\"GHZ Task ID: \" + jsonData.task_id);"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"qc\": \"OPENQASM 3.0;\\nqreg q[3];\\ncreg c[3];\\nh q[0];\\ncx q[0], q[1];\\ncx q[1], q[2];\\nmeasure q -> c;\"\n}"
+        },
+        "url": {
+          "raw": "http://0.0.0.0:8000/tasks",
+          "protocol": "http",
+          "host": [
+            "0",
+            "0",
+            "0",
+            "0"
+          ],
+          "port": "8000",
+          "path": [
+            "tasks"
+          ]
+        },
+        "description": "Submit a GHZ state circuit for execution"
+      },
+      "response": []
+    },
+    {
+      "name": "Check GHZ State Result",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "var jsonData = JSON.parse(responseBody);",
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "pm.test(\"Task status is available\", function () {",
+              "    pm.expect(jsonData.status).to.exist;",
+              "});",
+              "pm.test(\"Status check\", function () {",
+              "    pm.expect([\"completed\", \"processing\", \"pending\"]).to.include(jsonData.status);",
+              "});",
+              "if (jsonData.status === \"completed\") {",
+              "    pm.test(\"Results present for completed task\", function () {",
+              "        pm.expect(jsonData.result).to.exist;",
+              "    });",
+              "}"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://0.0.0.0:8000/tasks/{{ghzTaskId}}",
+          "protocol": "http",
+          "host": [
+            "0",
+            "0",
+            "0",
+            "0"
+          ],
+          "port": "8000",
+          "path": [
+            "tasks",
+            "{{ghzTaskId}}"
+          ]
+        },
+        "description": "Check the status of the GHZ state task"
+      },
+      "response": []
+    },
+    {
+      "name": "Complex Circuit (16 Qubits)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "var jsonData = JSON.parse(responseBody);",
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "pm.test(\"Task ID is present\", function () {",
+              "    pm.expect(jsonData.task_id).to.exist;",
+              "});",
+              "pm.environment.set(\"complexTaskId\", jsonData.task_id);",
+              "console.log(\"Complex Task ID: \" + jsonData.task_id);"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"qc\": \"OPENQASM 3.0;\\nqreg q[16];\\ncreg c[16];\\nh q[0];\\nh q[1];\\nh q[2];\\nh q[3];\\nh q[4];\\nh q[5];\\nh q[6];\\nh q[7];\\nh q[8];\\nh q[9];\\nh q[10];\\nh q[11];\\nh q[12];\\nh q[13];\\nh q[14];\\nh q[15];\\ncx q[0], q[1];\\ncx q[1], q[2];\\ncx q[2], q[3];\\ncx q[3], q[4];\\ncx q[4], q[5];\\ncx q[5], q[6];\\ncx q[6], q[7];\\ncx q[7], q[8];\\ncx q[8], q[9];\\ncx q[9], q[10];\\ncx q[10], q[11];\\ncx q[11], q[12];\\ncx q[12], q[13];\\ncx q[13], q[14];\\ncx q[14], q[15];\\ncx q[15], q[0];\\nh q[0];\\nh q[1];\\nh q[2];\\nh q[3];\\nh q[4];\\nh q[5];\\nh q[6];\\nh q[7];\\nh q[8];\\nh q[9];\\nh q[10];\\nh q[11];\\nh q[12];\\nh q[13];\\nh q[14];\\nh q[15];\\ncx q[0], q[8];\\ncx q[1], q[9];\\ncx q[2], q[10];\\ncx q[3], q[11];\\ncx q[4], q[12];\\ncx q[5], q[13];\\ncx q[6], q[14];\\ncx q[7], q[15];\\nh q[0];\\nh q[2];\\nh q[4];\\nh q[6];\\nh q[8];\\nh q[10];\\nh q[12];\\nh q[14];\\nmeasure q -> c;\"\n}"
+        },
+        "url": {
+          "raw": "http://0.0.0.0:8000/tasks",
+          "protocol": "http",
+          "host": [
+            "0",
+            "0",
+            "0",
+            "0"
+          ],
+          "port": "8000",
+          "path": [
+            "tasks"
+          ]
+        },
+        "description": "Submit a complex 16-qubit circuit that should take at least a minute to run"
+      },
+      "response": []
+    },
+    {
+      "name": "Check Complex Circuit Result",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "var jsonData = JSON.parse(responseBody);",
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "pm.test(\"Task status is available\", function () {",
+              "    pm.expect(jsonData.status).to.exist;",
+              "});",
+              "pm.test(\"Status check\", function () {",
+              "    pm.expect([\"completed\", \"processing\", \"pending\"]).to.include(jsonData.status);",
+              "});",
+              "if (jsonData.status === \"completed\") {",
+              "    pm.test(\"Results present for completed task\", function () {",
+              "        pm.expect(jsonData.result).to.exist;",
+              "    });",
+              "}",
+              "console.log(\"Complex task status: \" + jsonData.status);"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://0.0.0.0:8000/tasks/{{complexTaskId}}",
+          "protocol": "http",
+          "host": [
+            "0",
+            "0",
+            "0",
+            "0"
+          ],
+          "port": "8000",
+          "path": [
+            "tasks",
+            "{{complexTaskId}}"
+          ]
+        },
+        "description": "Check the status of the complex circuit task"
+      },
+      "response": []
+    },
+    {
+      "name": "Error Case - Missing Measurement",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "var jsonData = JSON.parse(responseBody);",
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "pm.test(\"Task ID is present\", function () {",
+              "    pm.expect(jsonData.task_id).to.exist;",
+              "});",
+              "pm.environment.set(\"errorTaskId1\", jsonData.task_id);"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"qc\": \"OPENQASM 3.0;\\nqreg q[2];\\ncreg c[2];\\nh q[0];\\ncx q[0], q[1];\"\n}"
+        },
+        "url": {
+          "raw": "http://0.0.0.0:8000/tasks",
+          "protocol": "http",
+          "host": [
+            "0",
+            "0",
+            "0",
+            "0"
+          ],
+          "port": "8000",
+          "path": [
+            "tasks"
+          ]
+        },
+        "description": "Submit a circuit with missing measurement operations"
+      },
+      "response": []
+    },
+    {
+      "name": "Check Error Case Result",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "var jsonData = JSON.parse(responseBody);",
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "pm.test(\"Task status is available\", function () {",
+              "    pm.expect(jsonData.status).to.exist;",
+              "});",
+              "pm.test(\"Error handling works correctly\", function () {",
+              "    if (jsonData.status === \"completed\") {",
+              "        pm.expect(jsonData.result.error).to.be.true;",
+              "        pm.expect(jsonData.result.message).to.include(\"measurement\");",
+              "    }",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://0.0.0.0:8000/tasks/{{errorTaskId1}}",
+          "protocol": "http",
+          "host": [
+            "0",
+            "0",
+            "0",
+            "0"
+          ],
+          "port": "8000",
+          "path": [
+            "tasks",
+            "{{errorTaskId1}}"
+          ]
+        },
+        "description": "Check the result of the error case"
+      },
+      "response": []
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          ""
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          ""
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://0.0.0.0:8000",
+      "type": "string"
+    }
+  ]
+}

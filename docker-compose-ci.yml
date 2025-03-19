@@ -1,0 +1,34 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    container_name: quantum_circuit_api
+    ports:
+      - "8000:8000"
+    depends_on:
+      - redis
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    networks:
+      - quantum_network
+
+  redis:
+    image: redis:6.2-alpine
+    container_name: quantum_redis
+    ports:
+      - "6379:6379"
+    networks:
+      - quantum_network
+  newman:
+    image: pstauffer/newman-htmlextra
+    volumes:
+      - ./test:/etc/newman
+    entrypoint: tail -f /dev/null
+  wait:
+    image: dokku/wait
+
+networks:
+  quantum_network:
+    driver: bridge

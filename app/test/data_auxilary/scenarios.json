@@ -1,0 +1,134 @@
+[
+  {
+    "name": "Bell State",
+    "description": "Creates a basic Bell state (maximally entangled state) between two qubits. Expected outcome: Equal probability of measuring '00' and '11' (binary 0 and 3 in decimal).",
+    "circuit": {
+      "qc": "OPENQASM 3.0;\nqreg q[2];\ncreg c[2];\nh q[0];\ncx q[0], q[1];\nmeasure q -> c;"
+    },
+    "expected_results": {
+      "unique_outcomes": 2,
+      "distribution": "Approximately 50% each for states '0' (00) and '3' (11)"
+    },
+    "execution_time": "Fast (< 1 second)"
+  },
+  {
+    "name": "GHZ State",
+    "description": "Creates a Greenberger-Horne-Zeilinger (GHZ) state among three qubits. Expected outcome: Equal probability of measuring '000' and '111' (binary 0 and 7 in decimal).",
+    "circuit": {
+      "qc": "OPENQASM 3.0;\nqreg q[3];\ncreg c[3];\nh q[0];\ncx q[0], q[1];\ncx q[1], q[2];\nmeasure q -> c;"
+    },
+    "expected_results": {
+      "unique_outcomes": 2,
+      "distribution": "Approximately 50% each for states '0' (000) and '7' (111)"
+    },
+    "execution_time": "Fast (< 1 second)"
+  },
+  {
+    "name": "W State",
+    "description": "Creates a W state among three qubits, which is another type of entangled state. Expected outcome: Equal probability of measuring '001', '010', and '100' (binary 1, 2, and 4 in decimal).",
+    "circuit": {
+      "qc": "OPENQASM 3.0;\nqreg q[3];\ncreg c[3];\nx q[0];\nh q[1];\ncu1(pi/3) q[1], q[0];\nh q[2];\ncu1(pi/3) q[2], q[0];\ncu1(pi/3) q[2], q[1];\nmeasure q -> c;"
+    },
+    "expected_results": {
+      "unique_outcomes": 3,
+      "distribution": "Approximately 33% each for states '1' (001), '2' (010), and '4' (100)"
+    },
+    "execution_time": "Fast (< 1 second)"
+  },
+  {
+    "name": "Quantum Fourier Transform - 4 Qubits",
+    "description": "Implements a 4-qubit Quantum Fourier Transform which is fundamental to many quantum algorithms. Expected outcome: Complex distribution across all possible states.",
+    "circuit": {
+      "qc": "OPENQASM 3.0;\nqreg q[4];\ncreg c[4];\n\n// Initialize with non-uniform state\nx q[0];\nx q[2];\n\n// QFT implementation\nh q[0];\ncp(pi/2) q[1],q[0];\ncp(pi/4) q[2],q[0];\ncp(pi/8) q[3],q[0];\nh q[1];\ncp(pi/2) q[2],q[1];\ncp(pi/4) q[3],q[1];\nh q[2];\ncp(pi/2) q[3],q[2];\nh q[3];\n\n// Swap qubits to get the correct output order\nswap q[0],q[3];\nswap q[1],q[2];\n\nmeasure q -> c;"
+    },
+    "expected_results": {
+      "unique_outcomes": 16,
+      "distribution": "Complex distribution across multiple states"
+    },
+    "execution_time": "Medium (1-5 seconds)"
+  },
+  {
+    "name": "Grover's Algorithm - 3 Qubits",
+    "description": "Implements Grover's search algorithm to find the marked state '101'. Expected outcome: High probability of measuring the state '101' (binary 5 in decimal).",
+    "circuit": {
+      "qc": "OPENQASM 3.0;\nqreg q[3];\ncreg c[3];\n\n// Initialize in superposition\nh q[0];\nh q[1];\nh q[2];\n\n// Oracle for marking state |101>\nx q[0];\nx q[2];\ncz q[0],q[1];\ncz q[1],q[2];\nx q[0];\nx q[2];\n\n// Diffusion operator\nh q[0];\nh q[1];\nh q[2];\nx q[0];\nx q[1];\nx q[2];\nh q[2];\nccx q[0],q[1],q[2];\nh q[2];\nx q[0];\nx q[1];\nx q[2];\nh q[0];\nh q[1];\nh q[2];\n\nmeasure q -> c;"
+    },
+    "expected_results": {
+      "unique_outcomes": "Several, with state '5' (101) having the highest probability",
+      "distribution": "State '5' (101) should have significantly higher probability than others"
+    },
+    "execution_time": "Fast (< 1 second)"
+  },
+  {
+    "name": "Error Case - Missing Measurement",
+    "description": "Circuit without any measurement operations. Expected outcome: Error indicating that measurement operations are missing.",
+    "circuit": {
+      "qc": "OPENQASM 3.0;\nqreg q[2];\ncreg c[2];\nh q[0];\ncx q[0], q[1];"
+    },
+    "expected_results": {
+      "error": true,
+      "message": "No measurement operations in circuit"
+    },
+    "execution_time": "Fast (< 1 second)"
+  },
+  {
+    "name": "Error Case - Syntax Error",
+    "description": "Circuit with a syntax error (missing semicolon). Expected outcome: Error indicating a syntax issue.",
+    "circuit": {
+      "qc": "OPENQASM 3.0;\nqreg q[2];\ncreg c[2];\nh q[0]\ncx q[0], q[1];\nmeasure q -> c;"
+    },
+    "expected_results": {
+      "error": true,
+      "message": "Syntax error related to missing semicolon"
+    },
+    "execution_time": "Fast (< 1 second)"
+  },
+  {
+    "name": "Error Case - Invalid Register Reference",
+    "description": "Circuit referencing a non-existent qubit. Expected outcome: Error indicating an invalid register reference.",
+    "circuit": {
+      "qc": "OPENQASM 3.0;\nqreg q[2];\ncreg c[2];\nh q[0];\ncx q[0], q[3];\nmeasure q -> c;"
+    },
+    "expected_results": {
+      "error": true,
+      "message": "Error about out-of-range index for register"
+    },
+    "execution_time": "Fast (< 1 second)"
+  },
+  {
+    "name": "Medium Complexity - Quantum Teleportation",
+    "description": "Implements the quantum teleportation protocol. Expected outcome: The state of the first qubit is teleported to the third qubit.",
+    "circuit": {
+      "qc": "OPENQASM 3.0;\nqreg q[3];\ncreg c[2];\n\n// Prepare the state to teleport (qubit 0)\nrx(pi/4) q[0];\n\n// Create Bell pair between qubits 1 and 2\nh q[1];\ncx q[1], q[2];\n\n// Bell measurement between qubits 0 and 1\ncx q[0], q[1];\nh q[0];\nmeasure q[0] -> c[0];\nmeasure q[1] -> c[1];\n\n// Apply corrections to qubit 2 based on measurements\nif(c==1) x q[2];\nif(c==2) z q[2];\nif(c==3) { z q[2]; x q[2]; }\n\n// Measure the final state of qubit 2\ncreg c2[1];\nmeasure q[2] -> c2[0];"
+    },
+    "expected_results": {
+      "unique_outcomes": "Various due to probabilistic nature",
+      "distribution": "Final state of qubit 2 should match the initial state of qubit 0"
+    },
+    "execution_time": "Medium (1-5 seconds)"
+  },
+  {
+    "name": "High Complexity - 12-Qubit Circuit",
+    "description": "A complex circuit with 12 qubits and multiple operations. Expected outcome: Highly entangled state with a complex measurement distribution.",
+    "circuit": {
+      "qc": "OPENQASM 3.0;\nqreg q[12];\ncreg c[12];\n\n// Create superposition\nh q[0];\nh q[1];\nh q[2];\nh q[3];\nh q[4];\nh q[5];\nh q[6];\nh q[7];\nh q[8];\nh q[9];\nh q[10];\nh q[11];\n\n// Create entanglement chain\ncx q[0], q[1];\ncx q[1], q[2];\ncx q[2], q[3];\ncx q[3], q[4];\ncx q[4], q[5];\ncx q[5], q[6];\ncx q[6], q[7];\ncx q[7], q[8];\ncx q[8], q[9];\ncx q[9], q[10];\ncx q[10], q[11];\n\n// Cross-entanglement\ncx q[0], q[6];\ncx q[1], q[7];\ncx q[2], q[8];\ncx q[3], q[9];\ncx q[4], q[10];\ncx q[5], q[11];\n\n// More operations\nh q[0];\nh q[2];\nh q[4];\nh q[6];\nh q[8];\nh q[10];\n\nmeasure q -> c;"
+    },
+    "expected_results": {
+      "unique_outcomes": "Many (potentially hundreds)",
+      "distribution": "Complex distribution across many states"
+    },
+    "execution_time": "Long (> 30 seconds)"
+  },
+  {
+    "name": "Very High Complexity - 16-Qubit Circuit",
+    "description": "An extremely complex circuit with 16 qubits designed to stress-test the simulator. Expected outcome: Will take significant time to simulate.",
+    "circuit": {
+      "qc": "OPENQASM 3.0;\nqreg q[16];\ncreg c[16];\n\nh q[0];\nh q[1];\nh q[2];\nh q[3];\nh q[4];\nh q[5];\nh q[6];\nh q[7];\nh q[8];\nh q[9];\nh q[10];\nh q[11];\nh q[12];\nh q[13];\nh q[14];\nh q[15];\n\ncx q[0], q[1];\ncx q[1], q[2];\ncx q[2], q[3];\ncx q[3], q[4];\ncx q[4], q[5];\ncx q[5], q[6];\ncx q[6], q[7];\ncx q[7], q[8];\ncx q[8], q[9];\ncx q[9], q[10];\ncx q[10], q[11];\ncx q[11], q[12];\ncx q[12], q[13];\ncx q[13], q[14];\ncx q[14], q[15];\ncx q[15], q[0];\n\nh q[0];\nh q[1];\nh q[2];\nh q[3];\nh q[4];\nh q[5];\nh q[6];\nh q[7];\nh q[8];\nh q[9];\nh q[10];\nh q[11];\nh q[12];\nh q[13];\nh q[14];\nh q[15];\n\ncx q[0], q[8];\ncx q[1], q[9];\ncx q[2], q[10];\ncx q[3], q[11];\ncx q[4], q[12];\ncx q[5], q[13];\ncx q[6], q[14];\ncx q[7], q[15];\n\nh q[0];\nh q[2];\nh q[4];\nh q[6];\nh q[8];\nh q[10];\nh q[12];\nh q[14];\n\nmeasure q -> c;"
+    },
+    "expected_results": {
+      "unique_outcomes": "Many (potentially thousands)",
+      "distribution": "Complex distribution across many states"
+    },
+    "execution_time": "Very Long (> 60 seconds)"
+  }
+]
