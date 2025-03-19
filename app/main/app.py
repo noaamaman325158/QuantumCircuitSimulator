@@ -1,8 +1,8 @@
+import json
 import uuid
-
 from fastapi import FastAPI, BackgroundTasks, HTTPException
 from pydantic import BaseModel
-from typing import Dict, Optional
+from models.TaskResult import TaskResult
 from models.QuantumCircuitRequest import QuantumCircuitRequest
 import logging
 import redis
@@ -42,10 +42,7 @@ class TaskResponse(BaseModel):
     message: str
 
 
-class TaskResult(BaseModel):
-    status: str
-    result: Optional[Dict[str, int]] = None
-    message: Optional[str] = None
+
 
 
 def process_quantum_circuit(task_id: str, qc_data: str):
@@ -87,7 +84,6 @@ async def create_task(request: QuantumCircuitRequest, background_tasks: Backgrou
         raise HTTPException(status_code=500, detail=f"Error creating task: {str(e)}")
 
 
-
 @app.get("/tasks/{task_id}", response_model=TaskResult)
 async def get_task_result(task_id: str):
     """
@@ -97,7 +93,45 @@ async def get_task_result(task_id: str):
 
     Returns the task status and results if completed.
     """
+    try:
+        task_data = redis_client.hgetall(f"task:{task_id}")
 
+        if not task_data:
+            return {
+                "status": "error",
+                "message": "Task not found."
+            }
+
+        if task_data.get("status") == "pending" or task_data.get("status") == "processing":
+            return {
+                "status": "pending",
+                "message": "Task is still in progress."
+            }
+
+        if task_data.get("status") == "completed" and "result" in task_data:
+            try:
+                result = json.loads(task_data["result"])
+                return {
+                    "status": "completed",
+                    "result": result
+                }
+            except json.JSONDecodeError:
+                logger.error(f"Failed to parse result JSON for task {task_id}")
+                return {
+                    "status": "error",
+                    "message": "Error parsing task results."
+                }
+        return {
+            "status": "error",
+            "message": task_data.get("message", "Unknown error occurred.")
+        }
+
+    except Exception as e:
+        logger.error(f"Error retrieving task result: {str(e)}")
+        return {
+            "status": "error",
+            "message": "An error occurred while retrieving the task."
+        }
 
 
 @app.get("/test-redis")
