@@ -1,0 +1,6 @@
+fastapi==0.103.1
+uvicorn==0.23.2
+redis==5.0.1
+pydantic==2.3.0
+qiskit==0.44.2
+qiskit-aer==0.12.2
