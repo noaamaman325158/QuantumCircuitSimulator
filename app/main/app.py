@@ -1,5 +1,7 @@
 import json
 import uuid
+from dotenv import load_dotenv
+
 from fastapi import FastAPI, BackgroundTasks, HTTPException
 
 from app.main.models.QuantumCircuitRequest import QuantumCircuitRequest
@@ -13,6 +15,10 @@ import logging
 import redis
 import os
 
+
+load_dotenv()
+
+
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
@@ -21,7 +27,6 @@ logger = logging.getLogger(__name__)
 
 REDIS_HOST = os.getenv("REDIS_HOST", "localhost")
 REDIS_PORT = int(os.getenv("REDIS_PORT", 6380))
-
 try:
     redis_client = redis.Redis(
         host=REDIS_HOST,
