@@ -1,6 +1,9 @@
+import uuid
+
 from fastapi import FastAPI, BackgroundTasks, HTTPException
 from pydantic import BaseModel
 from typing import Dict, Optional
+from models.QuantumCircuitRequest import QuantumCircuitRequest
 import logging
 import redis
 import os
@@ -34,10 +37,6 @@ app = FastAPI(
 )
 
 
-class QuantumCircuitRequest(BaseModel):
-    qc: str
-
-
 class TaskResponse(BaseModel):
     task_id: str
     message: str
@@ -66,6 +65,26 @@ async def create_task(request: QuantumCircuitRequest, background_tasks: Backgrou
 
     Returns a unique task ID for tracking the processing status.
     """
+    task_id = str(uuid.uuid4())
+
+    try:
+        redis_client.hset(
+            f"task:{task_id}",
+            mapping={
+                "status": "pending",
+                "message": "Task submitted successfully."
+            }
+        )
+
+        background_tasks.add_task(process_quantum_circuit, task_id, request.qc)
+
+        return TaskResponse(
+            task_id=task_id,
+            message="Task submitted successfully."
+        )
+    except Exception as e:
+        logger.error(f"Error creating task: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error creating task: {str(e)}")
 
 
 
