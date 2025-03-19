@@ -1,9 +1,14 @@
 import json
 import uuid
 from fastapi import FastAPI, BackgroundTasks, HTTPException
-from pydantic import BaseModel
-from models.TaskResult import TaskResult
+
 from models.QuantumCircuitRequest import QuantumCircuitRequest
+from models.TaskResponse import TaskResponse
+from models.PendingTaskResponse import PendingTaskResponse
+from service.quantum_circuit_service import QuantumCircuitService
+from models.CompletedTaskResponse import CompletedTaskResponse
+from models.ErrorTaskResponse import ErrorTaskResponse
+
 import logging
 import redis
 import os
@@ -37,21 +42,55 @@ app = FastAPI(
 )
 
 
-class TaskResponse(BaseModel):
-    task_id: str
-    message: str
 
 
 
-
-
-def process_quantum_circuit(task_id: str, qc_data: str):
+async def process_quantum_circuit(task_id: str, qasm_string: str):
     """
-    Simulate processing of a quantum circuit.
-    :param task_id: Unique identifier for the task
-    :param qc_data: Serialized quantum circuit in QASM3 format
-    """
+    Process a quantum circuit asynchronously.
 
+    Args:
+        task_id: Unique task identifier
+        qasm_string: QASM representation of a quantum circuit
+    """
+    try:
+        # Create an instance of the service
+        service = QuantumCircuitService(shots=1024)
+
+        # Execute the quantum circuit
+        result = service.execute_qasm(qasm_string)
+
+        # Store the result in Redis
+        if result.get("error", False):
+            # Store error result
+            redis_client.hset(
+                f"task:{task_id}",
+                mapping={
+                    "status": "error",
+                    "message": result.get("message", "Unknown error")
+                }
+            )
+        else:
+            # Store successful result
+            redis_client.hset(
+                f"task:{task_id}",
+                mapping={
+                    "status": "completed",
+                    "result": json.dumps(result.get("counts", {}))
+                }
+            )
+
+        logger.info(f"Task {task_id} completed successfully")
+    except Exception as e:
+        # Handle any unexpected errors
+        logger.error(f"Error processing task {task_id}: {str(e)}")
+        redis_client.hset(
+            f"task:{task_id}",
+            mapping={
+                "status": "error",
+                "message": f"Error processing task: {str(e)}"
+            }
+        )
 
 @app.post("/tasks", response_model=TaskResponse, status_code=202)
 async def create_task(request: QuantumCircuitRequest, background_tasks: BackgroundTasks):
@@ -65,6 +104,7 @@ async def create_task(request: QuantumCircuitRequest, background_tasks: Backgrou
     task_id = str(uuid.uuid4())
 
     try:
+        # Set initial task status in Redis
         redis_client.hset(
             f"task:{task_id}",
             mapping={
@@ -73,6 +113,8 @@ async def create_task(request: QuantumCircuitRequest, background_tasks: Backgrou
             }
         )
 
+        # Add the processing task to background tasks
+        # Remove the direct execution call - that should happen in process_quantum_circuit
         background_tasks.add_task(process_quantum_circuit, task_id, request.qc)
 
         return TaskResponse(
@@ -84,54 +126,59 @@ async def create_task(request: QuantumCircuitRequest, background_tasks: Backgrou
         raise HTTPException(status_code=500, detail=f"Error creating task: {str(e)}")
 
 
-@app.get("/tasks/{task_id}", response_model=TaskResult)
-async def get_task_result(task_id: str):
+@app.get("/tasks/{task_id}", response_model=None)
+async def get_task(task_id: str):
     """
-    Retrieve the results of a previously submitted quantum circuit using its unique task identifier.
+    Retrieve the status and results of a previously submitted task.
 
-    - **task_id**: Unique identifier for the task
+    Args:
+        task_id: Unique task identifier
 
-    Returns the task status and results if completed.
+    Returns:
+        Current status and results (if completed) of the task
     """
     try:
+        # Get task data from Redis
         task_data = redis_client.hgetall(f"task:{task_id}")
 
         if not task_data:
-            return {
-                "status": "error",
-                "message": "Task not found."
-            }
+            return ErrorTaskResponse(
+                status="error",
+                message="Task not found."
+            )
 
-        if task_data.get("status") == "pending" or task_data.get("status") == "processing":
-            return {
-                "status": "pending",
-                "message": "Task is still in progress."
-            }
+        # Convert bytes to strings if necessary
+        task_data = {k.decode() if isinstance(k, bytes) else k:
+                         v.decode() if isinstance(v, bytes) else v
+                     for k, v in task_data.items()}
 
-        if task_data.get("status") == "completed" and "result" in task_data:
-            try:
-                result = json.loads(task_data["result"])
-                return {
-                    "status": "completed",
-                    "result": result
-                }
-            except json.JSONDecodeError:
-                logger.error(f"Failed to parse result JSON for task {task_id}")
-                return {
-                    "status": "error",
-                    "message": "Error parsing task results."
-                }
-        return {
-            "status": "error",
-            "message": task_data.get("message", "Unknown error occurred.")
-        }
+        status = task_data.get("status")
+
+        if status == "completed":
+            # Parse the result JSON
+            result_data = json.loads(task_data.get("result", "{}"))
+            return CompletedTaskResponse(
+                status="completed",
+                result=result_data
+            )
+        elif status == "error":
+            return ErrorTaskResponse(
+                status="error",
+                message=task_data.get("message", "Unknown error")
+            )
+        else:
+            # Status is "pending" or any other state
+            return PendingTaskResponse(
+                status="pending",
+                message=task_data.get("message", "Task is still in progress.")
+            )
 
     except Exception as e:
-        logger.error(f"Error retrieving task result: {str(e)}")
-        return {
-            "status": "error",
-            "message": "An error occurred while retrieving the task."
-        }
+        logger.error(f"Error retrieving task {task_id}: {str(e)}")
+        return ErrorTaskResponse(
+            status="error",
+            message=f"Error retrieving task: {str(e)}"
+        )
 
 
 @app.get("/test-redis")
