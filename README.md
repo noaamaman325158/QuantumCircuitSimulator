@@ -47,6 +47,8 @@ The API documentation for the Quantum Circuit Simulator can be found at `http://
 It provides details about the available endpoints, request/response formats, and authentication requirements.
 ## Deployment on AWS EKS
 [eks.noaamaman.com/docs]
+![Untitled scene(2)](https://github.com/user-attachments/assets/d5d3571b-c590-4a28-b601-c06c8152af32)
+
 
 ## Deployment on AWS EC2
 [ec2.noaamaman.com/docs]
