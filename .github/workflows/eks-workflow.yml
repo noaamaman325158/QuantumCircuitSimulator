@@ -53,10 +53,37 @@ jobs:
       
     - name: Build and push manually
       run: |
+        # Debug information
+        echo "==== DEBUG INFO ===="
+        echo "Docker Registry: ${{ secrets.DOCKER_REGISTRY }}"
+        echo "App Name: ${{ secrets.APP_NAME }}"
+        echo "Version: ${{ steps.get_version.outputs.VERSION }}"
+        echo "Full Image Name: ${{ secrets.DOCKER_REGISTRY }}/${{ secrets.APP_NAME }}:${{ steps.get_version.outputs.VERSION }}"
+        echo "====================="
+        
+        # List repositories to confirm
+        echo "Listing ECR repositories:"
+        aws ecr describe-repositories --query 'repositories[*].repositoryName' --output table
+        
+        # Build the image
+        echo "Building Docker image..."
         docker build -t ${{ secrets.DOCKER_REGISTRY }}/${{ secrets.APP_NAME }}:${{ steps.get_version.outputs.VERSION }} .
+        
+        # Tag the image
+        echo "Tagging image as latest..."
         docker tag ${{ secrets.DOCKER_REGISTRY }}/${{ secrets.APP_NAME }}:${{ steps.get_version.outputs.VERSION }} ${{ secrets.DOCKER_REGISTRY }}/${{ secrets.APP_NAME }}:latest
+        
+        # List images to confirm
+        echo "Local Docker images:"
+        docker images | grep "${{ secrets.APP_NAME }}"
+        
+        # Push images
+        echo "Pushing versioned image..."
         docker push ${{ secrets.DOCKER_REGISTRY }}/${{ secrets.APP_NAME }}:${{ steps.get_version.outputs.VERSION }}
+        
+        echo "Pushing latest image..."
         docker push ${{ secrets.DOCKER_REGISTRY }}/${{ secrets.APP_NAME }}:latest
+        
     
     - name: Deploy to AWS EC2
       uses: appleboy/ssh-action@master
