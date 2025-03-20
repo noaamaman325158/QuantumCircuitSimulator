@@ -1,3 +1,4 @@
+import asyncio
 import json
 import uuid
 import time
@@ -12,21 +13,14 @@ from app.main.models.PendingTaskResponse import PendingTaskResponse
 from app.main.service.quantum_circuit_service import QuantumCircuitService
 from app.main.models.CompletedTaskResponse import CompletedTaskResponse
 from app.main.models.ErrorTaskResponse import ErrorTaskResponse
-
-# from models.QuantumCircuitRequest import QuantumCircuitRequest
-# from models.TaskResponse import TaskResponse
-# from models.PendingTaskResponse import PendingTaskResponse
-# from service.quantum_circuit_service import QuantumCircuitService
-# from models.CompletedTaskResponse import CompletedTaskResponse
-# from models.ErrorTaskResponse import ErrorTaskResponse
+from app.main.exceptions.custom_exceptions import QASMParsingError, CircuitExecutionError, RedisConnectionError, \
+    TaskProcessingError, TaskTimeoutError
 
 import logging
 import redis
 import os
 
-
 load_dotenv()
-
 
 logging.basicConfig(
     level=logging.INFO,
@@ -48,6 +42,7 @@ try:
 except redis.ConnectionError as e:
     logger.error(f"Failed to connect to Redis: {str(e)}")
     logger.error(f"Connection details: {REDIS_HOST}:{REDIS_PORT}")
+    raise RedisConnectionError(host=REDIS_HOST, port=REDIS_PORT)
 
 app = FastAPI(
     title="Quantum Circuit API",
@@ -55,30 +50,21 @@ app = FastAPI(
     version="1.0.0"
 )
 
-
-
-
-
-
-import time
-
-async def process_quantum_circuit(task_id: str, qasm_string: str):
+async def process_quantum_circuit(task_id: str, qasm_string: str, timeout: int = 30):
     """
     Process a quantum circuit asynchronously.
 
     Args:
         task_id: Unique task identifier
         qasm_string: QASM representation of a quantum circuit
+        timeout: Maximum processing time in seconds
     """
     try:
-        # Simulate pending status by sleeping for a few seconds
-        time.sleep(30)  # Sleep for 10 seconds
-
         # Create an instance of the service
         service = QuantumCircuitService(shots=1024)
 
-        # Execute the quantum circuit
-        result = service.execute_qasm(qasm_string)
+        # Execute the quantum circuit with a timeout
+        result = await asyncio.wait_for(service.execute_qasm(qasm_string), timeout=timeout)
 
         # Store the result in Redis
         if result.get("error", False):
@@ -101,16 +87,44 @@ async def process_quantum_circuit(task_id: str, qasm_string: str):
             )
 
         logger.info(f"Task {task_id} completed successfully")
-    except Exception as e:
-        # Handle any unexpected errors
-        logger.error(f"Error processing task {task_id}: {str(e)}")
+    except asyncio.TimeoutError:
+        logger.error(f"Task {task_id} timed out after {timeout} seconds")
         redis_client.hset(
             f"task:{task_id}",
             mapping={
                 "status": "error",
-                "message": f"Error processing task: {str(e)}"
+                "message": f"Task timed out after {timeout} seconds"
             }
         )
+        raise TaskTimeoutError(task_id=task_id, timeout=timeout)
+    except QASMParsingError as e:
+        logger.error(f"QASM parsing error for task {task_id}: {str(e)}")
+        redis_client.hset(
+            f"task:{task_id}",
+            mapping={
+                "status": "error",
+                "message": f"QASM parsing error: {str(e)}"
+            }
+        )
+    except CircuitExecutionError as e:
+        logger.error(f"Circuit execution error for task {task_id}: {str(e)}")
+        redis_client.hset(
+            f"task:{task_id}",
+            mapping={
+                "status": "error",
+                "message": f"Circuit execution error: {str(e)}"
+            }
+        )
+    except Exception as e:
+        logger.error(f"Unexpected error processing task {task_id}: {str(e)}")
+        redis_client.hset(
+            f"task:{task_id}",
+            mapping={
+                "status": "error",
+                "message": f"Unexpected error: {str(e)}"
+            }
+        )
+        raise TaskProcessingError(task_id=task_id, message=str(e))
 
 @app.post("/tasks", response_model=TaskResponse, status_code=202)
 async def create_task(request: QuantumCircuitRequest, background_tasks: BackgroundTasks):
@@ -134,7 +148,6 @@ async def create_task(request: QuantumCircuitRequest, background_tasks: Backgrou
         )
 
         # Add the processing task to background tasks
-        # Remove the direct execution call - that should happen in process_quantum_circuit
         background_tasks.add_task(process_quantum_circuit, task_id, request.qc)
 
         return TaskResponse(
@@ -144,7 +157,6 @@ async def create_task(request: QuantumCircuitRequest, background_tasks: Backgrou
     except Exception as e:
         logger.error(f"Error creating task: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Error creating task: {str(e)}")
-
 
 @app.get("/tasks/{task_id}", response_model=None)
 async def get_task(task_id: str):
@@ -182,10 +194,7 @@ async def get_task(task_id: str):
                 result=result_data
             )
         elif status == "error":
-            return ErrorTaskResponse(
-                status="error",
-                message=task_data.get("message", "Unknown error")
-            )
+            raise HTTPException(status_code=400, detail=task_data.get("message", "Unknown error"))
         else:
             # Status is "pending" or any other state
             return PendingTaskResponse(
@@ -195,11 +204,7 @@ async def get_task(task_id: str):
 
     except Exception as e:
         logger.error(f"Error retrieving task {task_id}: {str(e)}")
-        return ErrorTaskResponse(
-            status="error",
-            message=f"Error retrieving task: {str(e)}"
-        )
-
+        raise HTTPException(status_code=500, detail=f"Error retrieving task: {str(e)}")
 
 @app.get("/test-redis")
 async def check_redis_connection():
@@ -221,8 +226,6 @@ async def check_redis_connection():
             status_code=500,
             detail=f"Failed to connect to Redis at {REDIS_HOST}:{REDIS_PORT}"
         )
-
-
 
 if __name__ == "__main__":
     import uvicorn
