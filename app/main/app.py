@@ -61,7 +61,7 @@ async def process_quantum_circuit(task_id: str, qasm_string: str, timeout: int =
     """
     try:
 
-        await asyncio.sleep
+        await asyncio.sleep(10)
         # Create an instance of the service
         service = QuantumCircuitService(shots=1024)
 
