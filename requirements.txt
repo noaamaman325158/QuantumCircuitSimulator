@@ -5,3 +5,4 @@ pydantic==2.3.0
 qiskit==0.44.2
 qiskit-aer==0.12.2
 python-dotenv
+requests
