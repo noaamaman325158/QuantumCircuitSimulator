@@ -35,17 +35,17 @@ jobs:
           context: .
           push: true
           tags: noaa13092/quantum-circuit-simulator:${{ steps.get_version.outputs.VERSION }}
-      - name: Deploy to AWS EC2
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.EC2_INSTANCE_PUBLIC_IP }}
-          username: ec2-user
-          key: ${{ secrets.SSH_KEY }}
-          script: |
-            container_id=$(sudo docker ps | grep "quantum-circuit-simulator" | awk '{print $1}')
-            if [ ! -z "$container_id" ]; then
-                sudo docker-compose down
-            fi
-            sudo docker system prune -f -a
-            sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/quantum-circuit-simulator:${{ steps.get_version.outputs.VERSION }}
-            sudo docker-compose up -d
+      # - name: Deploy to AWS EC2
+      #   uses: appleboy/ssh-action@master
+      #   with:
+      #     host: ${{ secrets.EC2_INSTANCE_PUBLIC_IP }}
+      #     username: ec2-user
+      #     key: ${{ secrets.SSH_KEY }}
+      #     script: |
+      #       container_id=$(sudo docker ps | grep "quantum-circuit-simulator" | awk '{print $1}')
+      #       if [ ! -z "$container_id" ]; then
+      #           sudo docker-compose down
+      #       fi
+      #       sudo docker system prune -f -a
+      #       sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/quantum-circuit-simulator:${{ steps.get_version.outputs.VERSION }}
+      #       sudo docker-compose up -d
