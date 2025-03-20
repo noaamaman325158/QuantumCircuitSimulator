@@ -51,8 +51,9 @@ It provides details about the available endpoints, request/response formats, and
 
 
 ## Deployment on AWS EC2
-[ec2.noaamaman.com/docs]
-![ec2-qunatum(1)](https://github.com/user-attachments/assets/53dd0d97-2da9-4fb0-bebd-37283679382a)
+(ec2.noaamaman.com/docs)
+![ec2-qunatum(2)](https://github.com/user-attachments/assets/a6f87445-3b8e-4ff7-9b11-8d721d8999c2)
+
 
 
 The project is deployed on an AWS EC2 instance using GitHub Actions for continuous deployment. The deployment process involves two workflows in the GitHub Actions CI/CD pipeline, the Docker Hub container registry, and the AWS EC2 service.
