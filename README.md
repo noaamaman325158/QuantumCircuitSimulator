@@ -44,7 +44,12 @@ To run the project locally using Docker Compose, follow these steps:
 4. Access the API endpoints:
    - Submit a quantum circuit: `POST http://localhost:8000/tasks`
    - Retrieve the status and result of a task: `GET http://localhost:8000/tasks/{task_id}`
-
+### Observe Different scenarios
+Except the tests, I attached some json file of scenarios  with explenation about each scenario - you can try them with nthe swagger interface or Postman.
+```shell
+   cd app/test/
+   cat scenarios.json
+```
 ## API Documentation(Swagger)
 The API documentation for the Quantum Circuit Simulator can be found at `http://localhost:8000/docs` when running the project locally.
 It provides details about the available endpoints, request/response formats, and authentication requirements.
