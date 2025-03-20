@@ -31,7 +31,7 @@ To run the project locally using Docker Compose, follow these steps:
 
 1. Clone the repository:
   ```shell
-  git@github.com:noaamaman325158/QuantumCircuitSimulator.git
+  git clone git@github.com:noaamaman325158/QuantumCircuitSimulator.git
 ```
 2.Navigate to the project directory:
 ```shell
@@ -39,7 +39,7 @@ To run the project locally using Docker Compose, follow these steps:
 ```
 3.Start the containers using Docker Compose:
 ```shell
-   docker-compose up -d
+   docker-compose -f docker-compose.yml up -d
 ```
 4. Access the API endpoints:
    - Submit a quantum circuit: `POST http://localhost:8000/tasks`
