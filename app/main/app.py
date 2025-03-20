@@ -4,6 +4,7 @@ import uuid
 from dotenv import load_dotenv
 
 from fastapi import FastAPI, BackgroundTasks, HTTPException
+from fastapi.middleware.cors import CORSMiddleware  # Import CORS middleware
 
 from app.main.models.QuantumCircuitRequest import QuantumCircuitRequest
 from app.main.models.TaskResponse import TaskResponse
@@ -48,6 +49,15 @@ app = FastAPI(
     version="1.0.0"
 )
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3001"],  # Your React app's origin
+    allow_credentials=True,
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],  # Explicitly include OPTIONS
+    allow_headers=["Content-Type", "Authorization"],
+)
+
+
 async def process_quantum_circuit(task_id: str, qasm_string: str, timeout: int = 30):
     """
     Process a quantum circuit asynchronously.
@@ -59,7 +69,7 @@ async def process_quantum_circuit(task_id: str, qasm_string: str, timeout: int =
     """
     try:
 
-        await asyncio.sleep(10)
+        await asyncio.sleep(30)
         # Create an instance of the service
         service = QuantumCircuitService(shots=1024)
 
@@ -126,6 +136,7 @@ async def process_quantum_circuit(task_id: str, qasm_string: str, timeout: int =
         )
         raise TaskProcessingError(task_id=task_id, message=str(e))
 
+
 @app.post("/tasks", response_model=TaskResponse, status_code=202)
 async def create_task(request: QuantumCircuitRequest, background_tasks: BackgroundTasks):
     """
@@ -156,6 +167,7 @@ async def create_task(request: QuantumCircuitRequest, background_tasks: Backgrou
     except Exception as e:
         logger.error(f"Error creating task: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Error creating task: {str(e)}")
+
 
 @app.get("/tasks/{task_id}", response_model=None)
 async def get_task(task_id: str):
@@ -193,7 +205,10 @@ async def get_task(task_id: str):
                 result=result_data
             )
         elif status == "error":
-            raise HTTPException(status_code=400, detail=task_data.get("message", "Unknown error"))
+            return ErrorTaskResponse(
+                status="error",
+                message=task_data.get("message", "Unknown error")
+            )
         else:
             # Status is "pending" or any other state
             return PendingTaskResponse(
@@ -204,6 +219,40 @@ async def get_task(task_id: str):
     except Exception as e:
         logger.error(f"Error retrieving task {task_id}: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Error retrieving task: {str(e)}")
+
+
+
+
+@app.get("/tasks")
+async def get_all_tasks():
+    """
+    Retrieve all tasks in the system.
+    """
+    try:
+        # Get all keys matching the pattern "task:*"
+        task_keys = redis_client.keys("task:*")
+
+        tasks = []
+        for key in task_keys:
+            task_id = key.replace("task:", "")
+            task_data = redis_client.hgetall(key)
+
+            # Process task data
+            task_info = {
+                "task_id": task_id,
+                "status": task_data.get("status", "unknown")
+            }
+
+            if "message" in task_data:
+                task_info["message"] = task_data["message"]
+
+            tasks.append(task_info)
+
+        return tasks
+    except Exception as e:
+        logger.error(f"Error retrieving all tasks: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error retrieving tasks: {str(e)}")
+
 
 @app.get("/test-redis")
 async def check_redis_connection():
@@ -226,6 +275,8 @@ async def check_redis_connection():
             detail=f"Failed to connect to Redis at {REDIS_HOST}:{REDIS_PORT}"
         )
 
+
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+
+    uvicorn.run(app, host="0.0.0.0", port=8001)  # Changed port to 8001
