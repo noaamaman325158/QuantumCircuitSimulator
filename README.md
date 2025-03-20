@@ -53,8 +53,17 @@ Except the tests, I attached some json file of scenarios  with explenation about
 Example for use-case:
 ```json
    {
+    "name": "GHZ State",
+    "description": "Creates a Greenberger-Horne-Zeilinger (GHZ) state among three qubits. Expected outcome: Equal probability of measuring '000' and '111' (binary 0 and 7 in decimal).",
+    "circuit": {
       "qc": "OPENQASM 3.0;\nqreg q[3];\ncreg c[3];\nh q[0];\ncx q[0], q[1];\ncx q[1], q[2];\nmeasure q -> c;"
-   }
+    },
+    "expected_results": {
+      "unique_outcomes": 2,
+      "distribution": "Approximately 50% each for states '0' (000) and '7' (111)"
+    },
+    "execution_time": "Fast (< 1 second)"
+  }
 ```
 ## API Documentation(Swagger)
 The API documentation for the Quantum Circuit Simulator can be found at `http://localhost:8000/docs` when running the project locally.
