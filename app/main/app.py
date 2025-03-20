@@ -60,6 +60,8 @@ async def process_quantum_circuit(task_id: str, qasm_string: str, timeout: int =
         timeout: Maximum processing time in seconds
     """
     try:
+
+        await asyncio.sleep
         # Create an instance of the service
         service = QuantumCircuitService(shots=1024)
 
@@ -149,7 +151,6 @@ async def create_task(request: QuantumCircuitRequest, background_tasks: Backgrou
 
         # Add the processing task to background tasks
         background_tasks.add_task(process_quantum_circuit, task_id, request.qc)
-
         return TaskResponse(
             task_id=task_id,
             message="Task submitted successfully."

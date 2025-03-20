@@ -1,5 +1,77 @@
 [
   {
+    "name": "Bell State",
+    "description": "Creates a basic Bell state (maximally entangled state) between two qubits. Expected outcome: Equal probability of measuring '00' and '11' (binary 0 and 3 in decimal).",
+    "circuit": {
+      "qc": "OPENQASM 3.0;\nqreg q[2];\ncreg c[2];\nh q[0];\ncx q[0], q[1];\nmeasure q -> c;"
+    },
+    "expected_results": {
+      "unique_outcomes": 2,
+      "distribution": "Approximately 50% each for states '0' (00) and '3' (11)"
+    },
+    "execution_time": "Fast (< 1 second)"
+  },
+  {
+    "name": "GHZ State",
+    "description": "Creates a Greenberger-Horne-Zeilinger (GHZ) state among three qubits. Expected outcome: Equal probability of measuring '000' and '111' (binary 0 and 7 in decimal).",
+    "circuit": {
+      "qc": "OPENQASM 3.0;\nqreg q[3];\ncreg c[3];\nh q[0];\ncx q[0], q[1];\ncx q[1], q[2];\nmeasure q -> c;"
+    },
+    "expected_results": {
+      "unique_outcomes": 2,
+      "distribution": "Approximately 50% each for states '0' (000) and '7' (111)"
+    },
+    "execution_time": "Fast (< 1 second)"
+  },
+  {
+    "name": "W State",
+    "description": "Creates a W state among three qubits, which is another type of entangled state. Expected outcome: Equal probability of measuring '001', '010', and '100' (binary 1, 2, and 4 in decimal).",
+    "circuit": {
+      "qc": "OPENQASM 3.0;\nqreg q[3];\ncreg c[3];\nx q[0];\nh q[1];\ncu1(pi/3) q[1], q[0];\nh q[2];\ncu1(pi/3) q[2], q[0];\ncu1(pi/3) q[2], q[1];\nmeasure q -> c;"
+    },
+    "expected_results": {
+      "unique_outcomes": 3,
+      "distribution": "Approximately 33% each for states '1' (001), '2' (010), and '4' (100)"
+    },
+    "execution_time": "Fast (< 1 second)"
+  },
+  {
+    "name": "Quantum Fourier Transform - 4 Qubits",
+    "description": "Implements a 4-qubit Quantum Fourier Transform which is fundamental to many quantum algorithms. Expected outcome: Complex distribution across all possible states.",
+    "circuit": {
+      "qc": "OPENQASM 3.0;\nqreg q[4];\ncreg c[4];\n\n// Initialize with non-uniform state\nx q[0];\nx q[2];\n\n// QFT implementation\nh q[0];\ncp(pi/2) q[1],q[0];\ncp(pi/4) q[2],q[0];\ncp(pi/8) q[3],q[0];\nh q[1];\ncp(pi/2) q[2],q[1];\ncp(pi/4) q[3],q[1];\nh q[2];\ncp(pi/2) q[3],q[2];\nh q[3];\n\n// Swap qubits to get the correct output order\nswap q[0],q[3];\nswap q[1],q[2];\n\nmeasure q -> c;"
+    },
+    "expected_results": {
+      "unique_outcomes": 16,
+      "distribution": "Complex distribution across multiple states"
+    },
+    "execution_time": "Medium (1-5 seconds)"
+  },
+  {
+    "name": "Grover's Algorithm - 3 Qubits",
+    "description": "Implements Grover's search algorithm to find the marked state '101'. Expected outcome: High probability of measuring the state '101' (binary 5 in decimal).",
+    "circuit": {
+      "qc": "OPENQASM 3.0;\nqreg q[3];\ncreg c[3];\n\n// Initialize in superposition\nh q[0];\nh q[1];\nh q[2];\n\n// Oracle for marking state |101>\nx q[0];\nx q[2];\ncz q[0],q[1];\ncz q[1],q[2];\nx q[0];\nx q[2];\n\n// Diffusion operator\nh q[0];\nh q[1];\nh q[2];\nx q[0];\nx q[1];\nx q[2];\nh q[2];\nccx q[0],q[1],q[2];\nh q[2];\nx q[0];\nx q[1];\nx q[2];\nh q[0];\nh q[1];\nh q[2];\n\nmeasure q -> c;"
+    },
+    "expected_results": {
+      "unique_outcomes": "Several, with state '5' (101) having the highest probability",
+      "distribution": "State '5' (101) should have significantly higher probability than others"
+    },
+    "execution_time": "Fast (< 1 second)"
+  },
+  {
+    "name": "Error Case - Missing Measurement",
+    "description": "Circuit without any measurement operations. Expected outcome: Error indicating that measurement operations are missing.",
+    "circuit": {
+      "qc": "OPENQASM 3.0;\nqreg q[2];\ncreg c[2];\nh q[0];\ncx q[0], q[1];"
+    },
+    "expected_results": {
+      "error": true,
+      "message": "No measurement operations in circuit"
+    },
+    "execution_time": "Fast (< 1 second)"
+  },
+  {
     "name": "Error Case - Invalid Gate",
     "description": "Circuit using an invalid gate. Expected outcome: Error indicating an invalid gate.",
     "circuit": {

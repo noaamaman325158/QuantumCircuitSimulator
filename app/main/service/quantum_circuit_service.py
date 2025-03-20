@@ -6,7 +6,6 @@ from app.main.exceptions.custom_exceptions import QASMParsingError, CircuitExecu
 
 logger = logging.getLogger(__name__)
 
-
 class QuantumCircuitService:
     """
     Service for creating, executing, and processing quantum circuits.
@@ -23,7 +22,7 @@ class QuantumCircuitService:
         self.simulator = AerSimulator()
         logger.info(f"Initialized QuantumCircuitService with {shots} shots")
 
-    def execute_qasm(self, qasm_string):
+    async def execute_qasm(self, qasm_string):
         """
         Execute a quantum circuit from QASM string.
 
@@ -41,7 +40,8 @@ class QuantumCircuitService:
             logger.info(f"Successfully parsed QASM string into circuit with {circuit.num_qubits} qubits")
 
             # Execute the circuit
-            result = self.simulator.run(circuit, shots=self.shots).result()
+            job = self.simulator.run(circuit, shots=self.shots)
+            result = job.result()  # This should be called synchronously
             counts = result.get_counts(circuit)
 
             logger.info(f"Circuit execution complete with {len(counts)} unique outcomes")
@@ -238,10 +238,7 @@ h q[2];
 cx q[0], q[1];
 t q[0];
 tdg q[1];
-cx q[0], q[1];
-c = measure q;
-"""
-
+cx q[0], q[1];"""
     print("\n===== Testing Basic Circuits =====")
     result1 = service.get_result_from_qasm(bell_qasm_3)
     print("Bell State Result:", result1)
