@@ -35,7 +35,7 @@ To run the project locally using Docker Compose, follow these steps:
 ```
 2.Navigate to the project directory:
 ```shell
-   cd quantum-circuit-simulator
+   cd QuantumCircuitSimulator
 ```
 3.Start the containers using Docker Compose:
 ```shell
