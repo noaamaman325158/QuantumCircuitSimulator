@@ -47,7 +47,7 @@ To run the project locally using Docker Compose, follow these steps:
 ### Observe Different scenarios
 Except the tests, I attached some json file of scenarios  with explenation about each scenario - you can try them with nthe swagger interface or Postman.
 ```shell
-   cd app/test/
+   cd app/test/data_auxilary
    cat scenarios.json
 ```
 ## API Documentation(Swagger)
