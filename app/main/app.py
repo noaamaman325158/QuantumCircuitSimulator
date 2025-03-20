@@ -51,7 +51,7 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3001", "https://front.noaamaman.com", "http://localhost:3000", "https://ec2.noaamaman.com", "https://eks.noaamaman.com"],
+    allow_origins=["http://localhost:3001", "https://front.noaamaman.com", "http://localhost:3000", "https://ec2.noaamaman.com", "https://eks.noaamaman.com", "https://d172ljyyx6k8hz.cloudfront.net"],
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allow_headers=["Content-Type", "Authorization"],
