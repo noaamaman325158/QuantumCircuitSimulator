@@ -50,6 +50,12 @@ Except the tests, I attached some json file of scenarios  with explenation about
    cd app/test/data_auxilary
    cat scenarios.json
 ```
+Example for use-case:
+```json
+   {
+      "qc": "OPENQASM 3.0;\nqreg q[3];\ncreg c[3];\nh q[0];\ncx q[0], q[1];\ncx q[1], q[2];\nmeasure q -> c;"
+   }
+```
 ## API Documentation(Swagger)
 The API documentation for the Quantum Circuit Simulator can be found at `http://localhost:8000/docs` when running the project locally.
 It provides details about the available endpoints, request/response formats, and authentication requirements.
