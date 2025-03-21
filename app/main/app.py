@@ -70,15 +70,12 @@ async def process_quantum_circuit(task_id: str, qasm_string: str, timeout: int =
     try:
 
         await asyncio.sleep(30)
-        # Create an instance of the service
+
         service = QuantumCircuitService(shots=1024)
 
-        # Execute the quantum circuit with a timeout
         result = await asyncio.wait_for(service.execute_qasm(qasm_string), timeout=timeout)
 
-        # Store the result in Redis
         if result.get("error", False):
-            # Store error result
             redis_client.hset(
                 f"task:{task_id}",
                 mapping={
@@ -87,7 +84,6 @@ async def process_quantum_circuit(task_id: str, qasm_string: str, timeout: int =
                 }
             )
         else:
-            # Store successful result
             redis_client.hset(
                 f"task:{task_id}",
                 mapping={
@@ -149,7 +145,6 @@ async def create_task(request: QuantumCircuitRequest, background_tasks: Backgrou
     task_id = str(uuid.uuid4())
 
     try:
-        # Set initial task status in Redis
         redis_client.hset(
             f"task:{task_id}",
             mapping={
@@ -158,7 +153,6 @@ async def create_task(request: QuantumCircuitRequest, background_tasks: Backgrou
             }
         )
 
-        # Add the processing task to background tasks
         background_tasks.add_task(process_quantum_circuit, task_id, request.qc)
         return TaskResponse(
             task_id=task_id,
@@ -181,7 +175,6 @@ async def get_task(task_id: str):
         Current status and results (if completed) of the task
     """
     try:
-        # Get task data from Redis
         task_data = redis_client.hgetall(f"task:{task_id}")
 
         if not task_data:
@@ -190,7 +183,6 @@ async def get_task(task_id: str):
                 message="Task not found."
             )
 
-        # Convert bytes to strings if necessary
         task_data = {k.decode() if isinstance(k, bytes) else k:
                          v.decode() if isinstance(v, bytes) else v
                      for k, v in task_data.items()}
@@ -198,7 +190,6 @@ async def get_task(task_id: str):
         status = task_data.get("status")
 
         if status == "completed":
-            # Parse the result JSON
             result_data = json.loads(task_data.get("result", "{}"))
             return CompletedTaskResponse(
                 status="completed",
@@ -210,7 +201,6 @@ async def get_task(task_id: str):
                 message=task_data.get("message", "Unknown error")
             )
         else:
-            # Status is "pending" or any other state
             return PendingTaskResponse(
                 status="pending",
                 message=task_data.get("message", "Task is still in progress.")
@@ -229,7 +219,6 @@ async def get_all_tasks():
     Retrieve all tasks in the system.
     """
     try:
-        # Get all keys matching the pattern "task:*"
         task_keys = redis_client.keys("task:*")
 
         tasks = []
@@ -237,7 +226,6 @@ async def get_all_tasks():
             task_id = key.replace("task:", "")
             task_data = redis_client.hgetall(key)
 
-            # Process task data
             task_info = {
                 "task_id": task_id,
                 "status": task_data.get("status", "unknown")
@@ -279,4 +267,4 @@ async def check_redis_connection():
 if __name__ == "__main__":
     import uvicorn
 
-    uvicorn.run(app, host="0.0.0.0", port=8000)  # Changed port to 8001
+    uvicorn.run(app, host="0.0.0.0", port=8000)
