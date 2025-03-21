@@ -46,10 +46,10 @@ To run the project locally using Docker Compose, follow these steps:
 The API documentation for the Quantum Circuit Simulator can be found at `http://localhost:8000/docs` when running the project locally.
 It provides details about the available endpoints, request/response formats, and authentication requirements.
 ## Deployment on AWS EKS
-[eks.noaamaman.com/docs]
+(eks.noaamaman.com/docs)
 
 ## Deployment on AWS EC2
-[ec2.noaamaman.com/docs]
+(ec2.noaamaman.com/docs)
 ![ec2-qunatum(1)](https://github.com/user-attachments/assets/53dd0d97-2da9-4fb0-bebd-37283679382a)
 
 
@@ -72,7 +72,6 @@ Here's an overview of the deployment process:
 7. Finally, Created some abstraction layer with CloudFront AWS service.
 
 You can access the public version in this CloudFront Distribution and Route53 with HTTPS protocol:
-(http://api.noaamaman.com/docs)
 
 The deployment workflow ensures that the latest version of the application is deployed on the EC2 instance whenever changes are pushed to the "master" branch.
 
