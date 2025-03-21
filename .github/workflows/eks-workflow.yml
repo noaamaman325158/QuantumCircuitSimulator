@@ -1,128 +1,126 @@
-name: Build and Push to ECR
-on: 
+name: Build and Deploy to EKS
+
+on:
   workflow_dispatch:
   push:
-    branches: [ eks, master ]
+    branches: [ main, master ]
 
 jobs:
-  build-and-push:
+  build-and-publish:
     runs-on: ubuntu-latest
+    
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v3
-        
-      - name: Get the version
-        id: get_version
-        run: echo "VERSION=$(echo ${GITHUB_REF#refs/heads/} | sed 's/master/latest/' | sed 's/[^a-zA-Z0-9]/-/g')-$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
-        
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.9'
-          
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-          
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v2
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ secrets.AWS_DEFAULT_REGION }}
-          
-      - name: Debug AWS identity
-        run: |
-          aws sts get-caller-identity
-          aws ecr describe-repositories || echo "No repositories or permission issue"
-          
-      - name: Create repository if it doesn't exist
-        run: |
-          aws ecr describe-repositories --repository-names ${{ secrets.APP_NAME }} || aws ecr create-repository --repository-name ${{ secrets.APP_NAME }}
+    - name: Checkout Repository
+      uses: actions/checkout@v3
       
-      # Add this new debugging step right here
-      - name: Debug repository info and ensure it exists
-        run: |
-          echo "==== REPOSITORY DEBUG INFO ===="
-          echo "App Name: ${{ secrets.APP_NAME }}"
-          echo "Docker Registry: ${{ secrets.DOCKER_REGISTRY }}"
-          echo "AWS Region: ${{ secrets.AWS_DEFAULT_REGION }}"
-          
-          # List existing repositories
-          echo "Existing repositories:"
-          aws ecr describe-repositories --query 'repositories[*].repositoryName' --output table || echo "No repositories found or permission issue"
-          
-          # Try to create repository with explicit error checking
-          echo "Attempting to create repository: ${{ secrets.APP_NAME }}"
-          aws ecr create-repository --repository-name ${{ secrets.APP_NAME }} 2>&1 || echo "Repository creation attempt finished (might already exist)"
-          
-          # Verify repository exists after creation attempt
-          echo "Verifying repository exists:"
-          aws ecr describe-repositories --repository-names ${{ secrets.APP_NAME }} --query 'repositories[0].repositoryName' --output text
-          
-          if [ $? -ne 0 ]; then
-            echo "ERROR: Repository still does not exist after creation attempt!"
-            echo "Please check your AWS permissions and repository name format."
-            exit 1
-          else
-            echo "✅ Repository verified successfully."
-          fi
-          
-      - name: Manual ECR login
-        run: |
-          aws ecr get-login-password --region ${{ secrets.AWS_DEFAULT_REGION }} | docker login --username AWS --password-stdin ${{ secrets.DOCKER_REGISTRY }}
-          
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v2
+    - name: Get the version
+      id: get_version
+      run: echo "VERSION=$(echo ${GITHUB_REF#refs/heads/} | sed 's/master/latest/' | sed 's/[^a-zA-Z0-9]/-/g')-$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+    
+    - name: Set up Python 3.9
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
         
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
         
-      - name: Build and push manually
-        run: |
-          # Debug information
-          echo "==== DEBUG INFO ===="
-          echo "Docker Registry: ${{ secrets.DOCKER_REGISTRY }}"
-          echo "App Name: ${{ secrets.APP_NAME }}"
-          echo "Version: ${{ steps.get_version.outputs.VERSION }}"
-          echo "Full Image Name: ${{ secrets.DOCKER_REGISTRY }}/${{ secrets.APP_NAME }}:${{ steps.get_version.outputs.VERSION }}"
-          echo "====================="
-          
-          # Build the image
-          echo "Building Docker image..."
-          docker build -t ${{ secrets.DOCKER_REGISTRY }}/${{ secrets.APP_NAME }}:${{ steps.get_version.outputs.VERSION }} .
-          
-          # Tag the image
-          echo "Tagging image as latest..."
-          docker tag ${{ secrets.DOCKER_REGISTRY }}/${{ secrets.APP_NAME }}:${{ steps.get_version.outputs.VERSION }} ${{ secrets.DOCKER_REGISTRY }}/${{ secrets.APP_NAME }}:latest
-          
-          # List images to confirm
-          echo "Local Docker images:"
-          docker images | grep "${{ secrets.APP_NAME }}"
-          
-          # Push images
-          echo "Pushing versioned image..."
-          docker push ${{ secrets.DOCKER_REGISTRY }}/${{ secrets.APP_NAME }}:${{ steps.get_version.outputs.VERSION }}
-          
-          echo "Pushing latest image..."
-          docker push ${{ secrets.DOCKER_REGISTRY }}/${{ secrets.APP_NAME }}:latest
-          
-      - name: Deploy to AWS EC2
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.EC2_INSTANCE_PUBLIC_IP }}
-          username: ec2-user
-          key: ${{ secrets.SSH_KEY }}
-          script: |
-            container_id=$(sudo docker ps | grep "${{ secrets.APP_NAME }}" | awk '{print $1}')
-            if [ ! -z "$container_id" ]; then
-              sudo docker-compose down
-            fi
-            sudo docker system prune -f -a
-            # Log in to ECR from EC2
-            aws ecr get-login-password --region ${{ secrets.AWS_DEFAULT_REGION }} | sudo docker login --username AWS --password-stdin ${{ secrets.DOCKER_REGISTRY }}
-            # Pull the latest image
-            sudo docker pull ${{ secrets.DOCKER_REGISTRY }}/${{ secrets.APP_NAME }}:${{ steps.get_version.outputs.VERSION }}
-            # Start the containers
-            sudo docker-compose up -d
+    - name: Run tests
+      run: |
+        python -m pytest
+        
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v2
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ secrets.AWS_DEFAULT_REGION }}
+        
+    - name: Create repository if it doesn't exist
+      run: |
+        aws ecr describe-repositories --repository-names ${{ secrets.APP_NAME }} || aws ecr create-repository --repository-name ${{ secrets.APP_NAME }}
+      
+    - name: Debug repository info
+      run: |
+        echo "==== REPOSITORY DEBUG INFO ===="
+        echo "App Name: ${{ secrets.APP_NAME }}"
+        echo "Docker Registry: ${{ secrets.DOCKER_REGISTRY }}"
+        echo "AWS Region: ${{ secrets.AWS_DEFAULT_REGION }}"
+        
+        aws ecr describe-repositories --repository-names ${{ secrets.APP_NAME }} --query 'repositories[0].repositoryName' --output text
+        
+    - name: Login to Amazon ECR
+      run: |
+        aws ecr get-login-password --region ${{ secrets.AWS_DEFAULT_REGION }} | docker login --username AWS --password-stdin ${{ secrets.DOCKER_REGISTRY }}
+        
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v2
+        
+    - name: Build and push Docker image
+      run: |
+        # Build the image
+        echo "Building Docker image..."
+        docker build -t ${{ secrets.DOCKER_REGISTRY }}/${{ secrets.APP_NAME }}:${{ steps.get_version.outputs.VERSION }} .
+        
+        # Tag the image as latest
+        docker tag ${{ secrets.DOCKER_REGISTRY }}/${{ secrets.APP_NAME }}:${{ steps.get_version.outputs.VERSION }} ${{ secrets.DOCKER_REGISTRY }}/${{ secrets.APP_NAME }}:latest
+        
+        # Push images
+        echo "Pushing versioned image..."
+        docker push ${{ secrets.DOCKER_REGISTRY }}/${{ secrets.APP_NAME }}:${{ steps.get_version.outputs.VERSION }}
+        
+        echo "Pushing latest image..."
+        docker push ${{ secrets.DOCKER_REGISTRY }}/${{ secrets.APP_NAME }}:latest
+        echo "IMAGE_TAG=${{ steps.get_version.outputs.VERSION }}" >> $GITHUB_ENV
+  
+  deploy-to-eks:
+    needs: build-and-publish
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v2
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ secrets.AWS_DEFAULT_REGION }}
+        role-to-assume: ${{ secrets.EKS_ROLE }}
+        role-duration-seconds: 1200
+    
+    - name: Install kubectl
+      run: |
+        export KUBECTL_VERSION=v1.25
+        curl -o kubectl https://s3.us-west-2.amazonaws.com/amazon-eks/1.25.2/2021-07-05/bin/linux/amd64/kubectl
+        chmod +x ./kubectl
+        mkdir -p $HOME/bin && cp ./kubectl $HOME/bin/kubectl && export PATH=$PATH:$HOME/bin
+    
+    - name: Install Helm
+      run: |
+        curl https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 > get_helm.sh
+        chmod 700 get_helm.sh
+        ./get_helm.sh
+    
+    - name: Debug AWS identity
+      run: |
+        aws --version
+        aws sts get-caller-identity
+    
+    - name: Configure kubeconfig
+      run: |
+        aws eks update-kubeconfig --name ${{ secrets.EKS_CLUSTER_NAME }} --region ${{ secrets.AWS_DEFAULT_REGION }} --role-arn ${{ secrets.EKS_ROLE }}
+        kubectl get nodes
+    
+    - name: Update Helm values and deploy
+      run: |
+        sed -i "s/latest/${{ env.IMAGE_TAG }}/" helm/values.yaml
+        helm upgrade -i ${{ secrets.APP_NAME }} helm/ --values helm/values.yaml
+        
+    - name: Verify deployment
+      run: |
+        kubectl get deployments
+        kubectl get pods
+        kubectl get services
