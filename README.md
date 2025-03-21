@@ -82,7 +82,7 @@ And run command:
 
 ## Deployment on AWS EC2
 
-(ec2.noaamaman.com/docs)
+(https://ec2.noaamaman.com/docs)
 
 ![image](https://github.com/user-attachments/assets/753354a7-b19a-47bf-9aa8-69f436329885)
 
@@ -122,7 +122,7 @@ By leveraging GitHub Actions, Docker Hub, and AWS EC2, the project achieves auto
 
 ## Deployment on AWS EKS
 
-(eks.noaamaman.com/docs)
+(https://eks.noaamaman.com/docs)
 
 ![Untitled scene(2)](https://github.com/user-attachments/assets/d5d3571b-c590-4a28-b601-c06c8152af32)
 
