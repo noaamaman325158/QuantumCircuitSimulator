@@ -77,14 +77,18 @@ And run command:
 ```shell
    python -m pytest
 ```
+
+![image](https://github.com/user-attachments/assets/f052f946-b65f-4f8f-879d-8c38ae80d784)
+
 ## Deployment on AWS EKS
-[eks.noaamaman.com/docs]
+(eks.noaamaman.com/docs)
 ![Untitled scene(2)](https://github.com/user-attachments/assets/d5d3571b-c590-4a28-b601-c06c8152af32)
 
 
 ## Deployment on AWS EC2
 (ec2.noaamaman.com/docs)
-![ec2-qunatum(2)](https://github.com/user-attachments/assets/a6f87445-3b8e-4ff7-9b11-8d721d8999c2)
+![image](https://github.com/user-attachments/assets/753354a7-b19a-47bf-9aa8-69f436329885)
+
 
 The project is deployed on an AWS EC2 instance using GitHub Actions for continuous deployment. The deployment process involves two workflows in the GitHub Actions CI/CD pipeline, the Docker Hub container registry, and the AWS EC2 service.
 
