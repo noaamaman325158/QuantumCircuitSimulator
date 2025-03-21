@@ -13,7 +13,6 @@ class TestTaskLifecycle:
         """
         Test a complete task submission, processing, and retrieval workflow
         """
-        # Quantum circuit for testing
         qasm_circuit = """
         OPENQASM 2.0;
         include "qelib1.inc";
@@ -24,33 +23,28 @@ class TestTaskLifecycle:
         measure q -> c;
         """
 
-        # Submit task
         submit_response = requests.post(
             "http://localhost:8000/tasks",
             json={"qc": qasm_circuit}
         )
         assert submit_response.status_code == 202, "Task submission failed"
 
-        # Extract task ID
         task_data = submit_response.json()
         task_id = task_data.get("task_id")
         assert task_id is not None, "No task ID returned"
 
-        # Poll for task completion
         max_attempts = 30
         for attempt in range(max_attempts):
             status_response = requests.get(f"http://localhost:8000/tasks/{task_id}")
             status_data = status_response.json()
 
             if status_data.get("status") == "completed":
-                # Validate results
                 assert "result" in status_data, "No results in completed task"
                 results = status_data["result"]
 
                 assert isinstance(results, dict), "Results should be a dictionary"
                 assert len(results) > 0, "Results dictionary is empty"
 
-                # Validate measurement results
                 for state, count in results.items():
                     assert isinstance(state, str), "Result keys should be strings"
                     assert isinstance(count, int), "Result values should be integers"
@@ -61,7 +55,6 @@ class TestTaskLifecycle:
             elif status_data.get("status") == "error":
                 pytest.fail(f"Task failed: {status_data.get('message', 'Unknown error')}")
 
-            # Wait before next polling attempt
             time.sleep(2)
         else:
             pytest.fail("Task did not complete within expected time")
@@ -70,7 +63,6 @@ class TestTaskLifecycle:
         """
         Test submitting multiple quantum circuits concurrently
         """
-        # Quantum circuit template
         qasm_circuit = """
         OPENQASM 2.0;
         include "qelib1.inc";
@@ -81,7 +73,6 @@ class TestTaskLifecycle:
         measure q -> c;
         """
 
-        # Submit multiple tasks
         task_ids = []
         for _ in range(5):
             submit_response = requests.post(
@@ -91,7 +82,6 @@ class TestTaskLifecycle:
             assert submit_response.status_code == 202, "Task submission failed"
             task_ids.append(submit_response.json().get("task_id"))
 
-        # Verify task completion for all submitted tasks
         completed_tasks = 0
         max_attempts = 40
         for _ in range(max_attempts):

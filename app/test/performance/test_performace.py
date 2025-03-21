@@ -14,7 +14,6 @@ class TestPerformance:
         """
         Test the API's ability to handle concurrent task submissions
         """
-        # Complex quantum circuit for performance testing
         complex_qasm_circuit = """
         OPENQASM 2.0;
         include "qelib1.inc";
@@ -32,14 +31,11 @@ class TestPerformance:
         measure q -> c;
         """
 
-        # Number of concurrent tasks
         num_tasks = 10
 
-        # Track submission times
         submission_times = []
         task_ids = []
 
-        # Concurrent task submission
         with concurrent.futures.ThreadPoolExecutor(max_workers=num_tasks) as executor:
             def submit_task():
                 start_time = time.time()
@@ -52,19 +48,15 @@ class TestPerformance:
                 assert response.status_code == 202, "Task submission failed"
                 return response.json().get("task_id"), end_time - start_time
 
-            # Submit tasks concurrently
             futures = [executor.submit(submit_task) for _ in range(num_tasks)]
 
-            # Collect results
             for future in concurrent.futures.as_completed(futures):
                 task_id, submission_time = future.result()
                 task_ids.append(task_id)
                 submission_times.append(submission_time)
 
-        # Performance assertions
         assert len(task_ids) == num_tasks, "Failed to submit all tasks"
 
-        # Submission time statistics
         avg_submission_time = statistics.mean(submission_times)
         max_submission_time = max(submission_times)
 
@@ -72,13 +64,11 @@ class TestPerformance:
         print(f"Average Submission Time: {avg_submission_time:.4f} seconds")
         print(f"Max Submission Time: {max_submission_time:.4f} seconds")
 
-        # Performance thresholds
         assert avg_submission_time < 2.0, "Average task submission time is too high"
         assert max_submission_time < 5.0, "Maximum task submission time is too high"
 
-        # Wait and verify task completions
         completed_tasks = 0
-        max_wait_time = 60  # Maximum wait time in seconds
+        max_wait_time = 60
         start_wait = time.time()
 
         while completed_tasks < num_tasks and time.time() - start_wait < max_wait_time:
@@ -98,14 +88,12 @@ class TestPerformance:
 
             time.sleep(2)
 
-        # Final completions check
         assert completed_tasks == num_tasks, f"Only {completed_tasks} of {num_tasks} tasks completed"
 
     def test_single_task_execution_time(self):
         """
         Measure the execution time for a single quantum circuit
         """
-        # Complex quantum circuit
         complex_qasm_circuit = """
         OPENQASM 2.0;
         include "qelib1.inc";
@@ -129,7 +117,6 @@ class TestPerformance:
         measure q -> c;
         """
 
-        # Submit task and track time
         start_time = time.time()
         submit_response = requests.post(
             "http://localhost:8000/tasks",
@@ -139,8 +126,7 @@ class TestPerformance:
 
         task_id = submit_response.json().get("task_id")
 
-        # Wait for completion
-        max_wait_time = 60  # Maximum wait time in seconds
+        max_wait_time = 60
         start_wait = time.time()
         completed = False
 
@@ -156,12 +142,10 @@ class TestPerformance:
 
             time.sleep(2)
 
-        # Calculate total time
         total_time = time.time() - start_time
 
         print(f"\nSingle Task Execution:")
         print(f"Total Execution Time: {total_time:.2f} seconds")
 
-        # Performance assertions
         assert completed, "Task did not complete within the time limit"
         assert total_time < 45, "Task took too long to complete"

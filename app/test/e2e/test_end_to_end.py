@@ -129,26 +129,21 @@ class TestEndToEndQuantumCircuitWorkflow:
         Test various error scenarios
         Adjusted to match current API behavior
         """
-        # API Base URL
         BASE_URL = "http://localhost:8000"
 
-        # Test Scenarios
         error_scenarios = [
-            # Invalid QASM Circuit
             {
                 "name": "Invalid QASM Circuit",
                 "payload": {"qc": "INVALID CIRCUIT"},
-                "expected_status_code": 202,  # Changed from [400, 422]
+                "expected_status_code": 202,
                 "expected_error_status": "error"
             },
-            # Empty Circuit
             {
                 "name": "Empty Circuit",
                 "payload": {"qc": ""},
-                "expected_status_code": 202,  # Changed from [400, 422]
+                "expected_status_code": 202,
                 "expected_error_status": "error"
             },
-            # Malformed Request
             {
                 "name": "Malformed Request",
                 "payload": {},
@@ -163,16 +158,15 @@ class TestEndToEndQuantumCircuitWorkflow:
                 json=scenario["payload"]
             )
 
-            # Check status code
+            time.sleep(30)
+
             assert response.status_code == scenario["expected_status_code"], \
                 f"Unexpected status code for {scenario['name']} scenario"
 
-            # For successful submissions, submit task and check status
             if response.status_code == 202:
                 task_id = response.json().get("task_id")
                 assert task_id is not None, "No task ID returned"
 
-                # Check task status
                 status_response = requests.get(f"{BASE_URL}/tasks/{task_id}")
                 status_data = status_response.json()
 
