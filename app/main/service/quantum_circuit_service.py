@@ -5,15 +5,15 @@ from qiskit_aer import AerSimulator
 from qiskit.qasm2.exceptions import QASM2ParseError
 
 from app.main.exceptions.custom_exceptions import QASMParsingError, CircuitExecutionError
-import logging
-global logger
 
+# Configure the logger
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 class QuantumCircuitService:
     """
     Service for creating, executing, and processing quantum circuits.
     """
-
 
     def __init__(self, shots=10000):
         """
