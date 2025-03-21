@@ -5,7 +5,9 @@ from qiskit_aer import AerSimulator
 from qiskit.qasm2.exceptions import QASM2ParseError
 
 from app.main.exceptions.custom_exceptions import QASMParsingError, CircuitExecutionError
-from app.main.app import logger
+import logging
+global logger
+
 
 class QuantumCircuitService:
     """

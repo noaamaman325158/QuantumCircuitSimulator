@@ -133,7 +133,7 @@ async def process_quantum_circuit(task_id: str, qasm_string: str, timeout: int =
         raise TaskProcessingError(task_id=task_id, message=str(e))
 
 
-@app.post("/tasks", response_model=TaskResponse, status_code=202)
+@app.post("/api/tasks", response_model=TaskResponse, status_code=202)
 async def create_task(request: QuantumCircuitRequest, background_tasks: BackgroundTasks):
     """
     Submit a quantum circuit for asynchronous processing.
@@ -163,7 +163,7 @@ async def create_task(request: QuantumCircuitRequest, background_tasks: Backgrou
         raise HTTPException(status_code=500, detail=f"Error creating task: {str(e)}")
 
 
-@app.get("/tasks/{task_id}", response_model=None)
+@app.get("/api/tasks/{task_id}", response_model=None)
 async def get_task(task_id: str):
     """
     Retrieve the status and results of a previously submitted task.
@@ -213,7 +213,7 @@ async def get_task(task_id: str):
 
 
 
-@app.get("/tasks")
+@app.get("/api/tasks")
 async def get_all_tasks():
     """
     Retrieve all tasks in the system.
@@ -242,7 +242,7 @@ async def get_all_tasks():
         raise HTTPException(status_code=500, detail=f"Error retrieving tasks: {str(e)}")
 
 
-@app.get("/test-redis")
+@app.get("/api/test-redis")
 async def check_redis_connection():
     """
     Test the connection to the Redis server.
