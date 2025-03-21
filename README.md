@@ -81,7 +81,9 @@ And run command:
 ![image](https://github.com/user-attachments/assets/f052f946-b65f-4f8f-879d-8c38ae80d784)
 
 ## Deployment on AWS EC2
+
 (ec2.noaamaman.com/docs)
+
 ![image](https://github.com/user-attachments/assets/753354a7-b19a-47bf-9aa8-69f436329885)
 
 
@@ -103,9 +105,6 @@ Here's an overview of the deployment process:
    
 7. Finally, Created some abstraction layer with CloudFront AWS service.
 
-You can access the public version in this CloudFront Distribution and Route53 with HTTPS protocol:
-(http://api.noaamaman.com/docs)
-
 The deployment workflow ensures that the latest version of the application is deployed on the EC2 instance whenever changes are pushed to the "master" branch.
 
 The two GitHub Actions workflows involved in the deployment process are:
@@ -122,7 +121,9 @@ The two GitHub Actions workflows involved in the deployment process are:
 By leveraging GitHub Actions, Docker Hub, and AWS EC2, the project achieves automated and seamless deployment, ensuring that the latest version of the application is always available on the production environment.
 
 ## Deployment on AWS EKS
+
 (eks.noaamaman.com/docs)
+
 ![Untitled scene(2)](https://github.com/user-attachments/assets/d5d3571b-c590-4a28-b601-c06c8152af32)
 
 The Quantum Circuit Simulator is deployed on Amazon EKS (Elastic Kubernetes Service), providing a scalable, highly available, and managed Kubernetes environment. This deployment leverages a robust CI/CD pipeline implemented through GitHub Actions.
