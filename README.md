@@ -80,40 +80,6 @@ And run command:
 
 ![image](https://github.com/user-attachments/assets/f052f946-b65f-4f8f-879d-8c38ae80d784)
 
-## Deployment on AWS EKS
-(eks.noaamaman.com/docs)
-![Untitled scene(2)](https://github.com/user-attachments/assets/d5d3571b-c590-4a28-b601-c06c8152af32)
-
-The Quantum Circuit Simulator is deployed on Amazon EKS (Elastic Kubernetes Service), providing a scalable, highly available, and managed Kubernetes environment. This deployment leverages a robust CI/CD pipeline implemented through GitHub Actions.
-The EKS deployment consists of several interconnected components:
-
--- Application Pods: Running the FastAPI web service that handles user requests
--- Redis Cluster: Acting as a message broker and result storage for quantum circuit executions
--- Worker Pods: Processing the quantum simulation tasks asynchronously
--- Kafka Integration: Enabling event-driven architecture for handling larger workloads
-
-When a new code change is pushed to the repository, the GitHub Actions CI/CD pipeline automatically:
-
-Builds and tests the application
-- Packages it into a Docker image
-- Pushes the image to Amazon ECR (Elastic Container Registry)
-- Updates the Kubernetes deployment configuration
-- Applies the changes to the EKS cluster
-
-This automated workflow ensures consistent deployments, minimizes human error, and enables rapid iteration.
-
-# Scaling Advantages
-The EKS deployment offers significant scaling benefits:
-
-1)Horizontal Pod Autoscaling: The system automatically scales the number of pods based on CPU utilization or custom metrics, allowing it to handle varying workloads efficiently. This is particularly valuable for quantum circuit simulations, which can have unpredictable resource requirements.
-2)Cluster Autoscaler: EKS can automatically adjust the number of worker nodes in the cluster, scaling infrastructure up during peak usage times and down during periods of low demand, optimizing cost efficiency.
-3)Workload Distribution: With Kubernetes' native load balancing, computation-intensive quantum simulations are distributed across multiple worker pods, preventing any single node from becoming a bottleneck.
-4)Microservices Architecture: The separation of the web application, worker processes, and Redis components allows each to scale independently according to their specific resource needs.
-5)Zero-Downtime Deployments: Rolling updates enable new versions to be deployed without service interruption, ensuring continuous availability of the quantum simulation service.
-
-The service is publicly accessible at eks.noaamaman.com/docs, where users can explore the API documentation and interact with the Quantum Circuit Simulator.
-
-
 ## Deployment on AWS EC2
 (ec2.noaamaman.com/docs)
 ![image](https://github.com/user-attachments/assets/753354a7-b19a-47bf-9aa8-69f436329885)
@@ -155,6 +121,42 @@ The two GitHub Actions workflows involved in the deployment process are:
 
 By leveraging GitHub Actions, Docker Hub, and AWS EC2, the project achieves automated and seamless deployment, ensuring that the latest version of the application is always available on the production environment.
 
+## Deployment on AWS EKS
+(eks.noaamaman.com/docs)
+![Untitled scene(2)](https://github.com/user-attachments/assets/d5d3571b-c590-4a28-b601-c06c8152af32)
+
+The Quantum Circuit Simulator is deployed on Amazon EKS (Elastic Kubernetes Service), providing a scalable, highly available, and managed Kubernetes environment. This deployment leverages a robust CI/CD pipeline implemented through GitHub Actions.
+The EKS deployment consists of several interconnected components:
+
+-- Application Pods: Running the FastAPI web service that handles user requests
+-- Redis Cluster: Acting as a message broker and result storage for quantum circuit executions
+-- Worker Pods: Processing the quantum simulation tasks asynchronously
+-- Kafka Integration: Enabling event-driven architecture for handling larger workloads
+
+When a new code change is pushed to the repository, the GitHub Actions CI/CD pipeline automatically:
+
+Builds and tests the application
+- Packages it into a Docker image
+- Pushes the image to Amazon ECR (Elastic Container Registry)
+- Updates the Kubernetes deployment configuration
+- Applies the changes to the EKS cluster
+
+This automated workflow ensures consistent deployments, minimizes human error, and enables rapid iteration.
+
+### Scaling Advantages
+The EKS deployment offers significant scaling benefits:
+
+1)Horizontal Pod Autoscaling: The system automatically scales the number of pods based on CPU utilization or custom metrics, allowing it to handle varying workloads efficiently. This is particularly valuable for quantum circuit simulations, which can have unpredictable resource requirements.
+
+2)Cluster Autoscaler: EKS can automatically adjust the number of worker nodes in the cluster, scaling infrastructure up during peak usage times and down during periods of low demand, optimizing cost efficiency.
+
+3)Workload Distribution: With Kubernetes' native load balancing, computation-intensive quantum simulations are distributed across multiple worker pods, preventing any single node from becoming a bottleneck.
+
+4)Microservices Architecture: The separation of the web application, worker processes, and Redis components allows each to scale independently according to their specific resource needs.
+
+5)Zero-Downtime Deployments: Rolling updates enable new versions to be deployed without service interruption, ensuring continuous availability of the quantum simulation service.
+
+The service is publicly accessible at eks.noaamaman.com/docs, where users can explore the API documentation and interact with the Quantum Circuit Simulator.
 
 ### Main Technolegies
 ![image](https://github.com/user-attachments/assets/50781b47-c182-4fb1-8626-5bdf32848f59)
