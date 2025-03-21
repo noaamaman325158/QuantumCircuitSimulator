@@ -125,3 +125,8 @@ The two GitHub Actions workflows involved in the deployment process are:
    - Builds the Docker image, pushes it to Docker Hub, and deploys the application to the AWS EC2 instance.
 
 By leveraging GitHub Actions, Docker Hub, and AWS EC2, the project achieves automated and seamless deployment, ensuring that the latest version of the application is always available on the production environment.
+
+
+### Main Technolegies
+![image](https://github.com/user-attachments/assets/50781b47-c182-4fb1-8626-5bdf32848f59)
+
