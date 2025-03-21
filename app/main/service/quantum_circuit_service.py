@@ -14,6 +14,7 @@ class QuantumCircuitService:
     Service for creating, executing, and processing quantum circuits.
     """
 
+
     def __init__(self, shots=10000):
         """
         Initialize the quantum circuit service.
