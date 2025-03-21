@@ -45,12 +45,12 @@ To run the project locally using Docker Compose, follow these steps:
    - Submit a quantum circuit: `POST http://localhost:8000/tasks`
    - Retrieve the status and result of a task: `GET http://localhost:8000/tasks/{task_id}`
 ### Observe Different scenarios
-Except the tests, I attached some json file of scenarios  with explenation about each scenario - you can try them with nthe swagger interface or Postman.
+In addition to the tests, there are JSON files with predefined scenarios and explanations that you can try with the Swagger interface or Postman.
 ```shell
    cd app/test/data_auxilary
    cat scenarios.json
 ```
-Example for use-case:
+Example use-case:
 ```json
    {
     "name": "GHZ State",
