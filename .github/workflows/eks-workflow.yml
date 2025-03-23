@@ -28,6 +28,15 @@ jobs:
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
         if [ -f test-requirements.txt ]; then pip install -r test-requirements.txt; fi
         
+    - name: Start server in background
+      run: |
+        # Start your FastAPI server in the background
+        python -m uvicorn app.main:app --host 0.0.0.0 --port 8000 &
+        # Wait for the server to start up (adjust time as needed)
+        sleep 5
+        # Test if the server is running
+        curl http://localhost:8000/health || echo "Server not responding"
+        
     - name: Run tests
       run: |
         python -m pytest
