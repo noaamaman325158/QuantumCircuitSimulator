@@ -24,7 +24,7 @@ class TestTaskLifecycle:
         """
 
         submit_response = requests.post(
-            "http://localhost:8000/tasks",
+            "http://localhost:8000/api/tasks",
             json={"qc": qasm_circuit}
         )
         assert submit_response.status_code == 202, "Task submission failed"
@@ -35,7 +35,7 @@ class TestTaskLifecycle:
 
         max_attempts = 30
         for attempt in range(max_attempts):
-            status_response = requests.get(f"http://localhost:8000/tasks/{task_id}")
+            status_response = requests.get(f"http://localhost:8000/api/tasks/{task_id}")
             status_data = status_response.json()
 
             if status_data.get("status") == "completed":
@@ -87,7 +87,7 @@ class TestTaskLifecycle:
         for _ in range(max_attempts):
             completed_this_round = 0
             for task_id in task_ids:
-                status_response = requests.get(f"http://localhost:8000/tasks/{task_id}")
+                status_response = requests.get(f"http://localhost:8000/api/tasks/{task_id}")
                 status_data = status_response.json()
 
                 if status_data.get("status") == "completed":
