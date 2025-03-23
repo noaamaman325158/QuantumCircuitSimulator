@@ -26,7 +26,7 @@ class TestEndToEndQuantumCircuitWorkflow:
         logger = logging.getLogger(__name__)
 
         # API Base URL (configurable if needed)
-        BASE_URL = "http://localhost:8000"
+        BASE_URL = "http://localhost:8000/api"
 
         # Step 1: API Health Check
         logger.info("Step 1: Checking API Health")
