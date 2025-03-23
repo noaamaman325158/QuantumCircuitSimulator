@@ -9,6 +9,19 @@ jobs:
   build-and-publish:
     runs-on: ubuntu-latest
     
+    # Add service containers
+    services:
+      redis:
+        image: redis
+        ports:
+          - 6379:6379
+        # Set health checks to wait until redis is ready
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    
     steps:
     - name: Checkout Repository
       uses: actions/checkout@v3
@@ -28,17 +41,20 @@ jobs:
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
         if [ -f test-requirements.txt ]; then pip install -r test-requirements.txt; fi
         
-    - name: Start server in background
+    - name: Start API server in background
       run: |
-        # Start your FastAPI server in the background
+        # Start the FastAPI server in background
         python -m uvicorn app.main:app --host 0.0.0.0 --port 8000 &
-        # Wait for the server to start up (adjust time as needed)
-        sleep 5
-        # Test if the server is running
-        curl http://localhost:8000/health || echo "Server not responding"
+        # Give the server some time to start up
+        echo "Waiting for server to start..."
+        sleep 10
+        # Check if the server is running
+        curl -s http://localhost:8000/health || echo "Warning: Server health check failed, but continuing..."
         
     - name: Run tests
       run: |
+        # Redis is available at localhost:6379
+        # API server is available at localhost:8000
         python -m pytest
         
     - name: Configure AWS credentials
