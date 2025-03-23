@@ -131,7 +131,7 @@ class TestPerformance:
         completed = False
 
         while not completed and time.time() - start_wait < max_wait_time:
-            status_response = requests.get(f"http://localhost:8000/tasks/{task_id}")
+            status_response = requests.get(f"http://localhost:8000/api/tasks/{task_id}")
             status_data = status_response.json()
 
             if status_data.get("status") == "completed":
