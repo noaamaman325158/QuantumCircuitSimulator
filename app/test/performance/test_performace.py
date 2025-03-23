@@ -74,7 +74,7 @@ class TestPerformance:
         while completed_tasks < num_tasks and time.time() - start_wait < max_wait_time:
             completed_this_round = 0
             for task_id in task_ids:
-                status_response = requests.get(f"http://localhost:8000/tasks/api/{task_id}")
+                status_response = requests.get(f"http://localhost:8000/api/tasks/{task_id}")
                 status_data = status_response.json()
 
                 if status_data.get("status") == "completed":
