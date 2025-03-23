@@ -129,7 +129,7 @@ class TestEndToEndQuantumCircuitWorkflow:
         Test various error scenarios
         Adjusted to match current API behavior
         """
-        BASE_URL = "http://localhost:8000"
+        BASE_URL = "http://localhost:8000/api"
 
         error_scenarios = [
             {

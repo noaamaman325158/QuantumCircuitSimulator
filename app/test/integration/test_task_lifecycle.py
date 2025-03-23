@@ -76,7 +76,7 @@ class TestTaskLifecycle:
         task_ids = []
         for _ in range(5):
             submit_response = requests.post(
-                "http://localhost:8000/tasks",
+                "http://localhost:8000/api/tasks",
                 json={"qc": qasm_circuit}
             )
             assert submit_response.status_code == 202, "Task submission failed"

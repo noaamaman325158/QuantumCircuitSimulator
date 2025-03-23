@@ -119,7 +119,7 @@ class TestPerformance:
 
         start_time = time.time()
         submit_response = requests.post(
-            "http://localhost:8000/tasks",
+            "http://localhost:8000/api/tasks",
             json={"qc": complex_qasm_circuit}
         )
         assert submit_response.status_code == 202, "Task submission failed"
